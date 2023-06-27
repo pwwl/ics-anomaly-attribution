@@ -1,0 +1,13 @@
+h5py==2.10.0
+jupyter==1.0.0
+lime==0.2.0.1
+networkx
+pandas==1.0.1
+pandocfilters==1.4.2
+pytz==2020.1
+scikit-learn==0.22.2.post1
+scipy==1.4.1
+seaborn
+shap==0.36.0
+six==1.15.0
+tensorflow

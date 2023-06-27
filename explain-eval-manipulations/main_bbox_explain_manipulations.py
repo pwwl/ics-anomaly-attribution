@@ -19,8 +19,6 @@ from sklearn.model_selection import train_test_split
 from data_loader import load_train_data, load_test_data
 from main_train import load_saved_model
 
-from live_explainer.score_generator import counterfactual_score_generator, counterfactual_minus_score_generator
-from live_explainer.score_generator import mse_score_generator, mse_sd_score_generator
 from live_explainer.score_generator import lime_score_generator, shap_score_generator, lemna_score_generator
 
 from tep_utils import idx_to_sen, load_tep_attack, get_footer_list
@@ -134,7 +132,7 @@ if __name__ == "__main__":
 	os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 
 	run_name = args.run_name
-	config = {} # type: Dict[str, str]
+	config = {}
 	utils.update_config_model(args, config, model_type, dataset_name)
 	model_name = config['name']
 	event_detector = load_saved_model(model_type, f'models/{run_name}/{model_name}.json', f'models/{run_name}/{model_name}.h5')

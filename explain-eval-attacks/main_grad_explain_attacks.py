@@ -41,72 +41,9 @@ from grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
 import attack_utils
 from main_train import load_saved_model
 
-import metrics
 import utils
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-def explain_by_tp(event_detector, run_name, model_name, explainer, Xtest, baseline, attack_idx, Yhat, use_top_feat=False, num_samples=100):
-
-	attacks, _ = attack_utils.get_attack_indices(dataset_name)
-	attack_start = attacks[attack_idx][0] - history - 1
-	attack_end = attacks[attack_idx][-1] - history - 1
-
-	window = 1
-	history = event_detector.params['history']
-	gif_outputs = np.zeros((num_samples, history, Xtest.shape[1]))
-
-	# Need to shift by history since the original Yhat is shifted
-	pred_region = Yhat[attack_start - history : attack_end - history]
-
-	print(f'Attack {attack_idx} total TPs {np.sum(pred_region == 1)}')
-
-	if np.any(pred_region == 1):
-
-		detect_idx = np.where(pred_region)[0][0]
-		count = 0
-
-		for i in range(detect_idx, detect_idx+num_samples):
-
-			# Go at least 1 history deep for the input
-			true_idx = attack_start + i
-			att_start = attack_start + i - history - 1
-			att_end = attack_start + i + 1
-
-			Xattack = Xtest[att_start : att_end]
-			Xattack_src, Yattack_src = event_detector.transform_to_window_data(Xattack, Xattack)
-
-			rec_errors = event_detector.reconstruction_errors(Xattack, batches=False)
-
-			print(f'For attack {attack_idx}, true detection at {i}. Processing {att_start} to {att_end}')
-
-			if use_top_feat:
-
-				top_feat = np.argmax(rec_errors)
-
-				# Only the first true positive is taken
-				explainer.setup_explainer(event_detector.inner, Yattack_src, top_feat)
-				gif_output = explainer.explain(Xattack_src, baselines=baseline, multiply_by_input=True)
-				gif_outputs[count] = gif_output
-
-			else:
-
-				# Only the first true positive is taken
-				explainer.setup_explainer(event_detector.inner, Yattack_src)
-				gif_output = explainer.explain(Xattack_src, baselines=baseline, multiply_by_input=True)
-				gif_outputs[count] = gif_output
-
-			count += 1
-
-			if count >= num_samples:
-				break
-
-		pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-tp{num_samples}.pkl', 'wb'))
-
-	else:
-		print(f'Attack {attack_idx} was missed.')
-
-	return
 
 def explain_true_position(event_detector, run_name, model_name, explainer, Xtest, baseline, attack_idx, use_top_feat=False, num_samples=100):
 
@@ -209,42 +146,6 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 
 	return
 
-def per_feature_detection(event_detector, Xval, Yval, Xtest, quant=0.9995, window=10, perfeat=False):
-
-	full_val_errors = (event_detector.predict(Xval) - Yval)**2
-	full_test_errors = event_detector.reconstruction_errors(Xtest, batches=True, verbose=0)
-
-	n_sensor = Xtest.shape[1]
-	feature_thresholds = np.zeros(n_sensor)
-	feature_detect = np.zeros_like(full_test_errors)
-	feature_detect_blocklist_idx = []
-
-	if perfeat:
-
-		## Use per-feature detection
-		for i in range(n_sensor):
-
-			feature_thresholds[i] = np.quantile(full_val_errors[:, i], quant)
-
-			if i in feature_detect_blocklist_idx:
-				continue
-			feature_detect[:, i] = full_test_errors[:, i] > feature_thresholds[i]
-
-		full_detection = np.sum(feature_detect, axis=1) > 0
-
-	else:
-
-		validation_instance_errors = np.mean(full_val_errors, axis=1)
-		test_instance_errors = np.mean(full_test_errors, axis=1)
-		threshold = np.quantile(validation_instance_errors, quant)
-		full_detection = test_instance_errors > threshold
-
-		pdb.set_trace()
-
-	window_detection = np.convolve(full_detection, np.ones(window), 'same') // window
-
-	return window_detection
-
 def parse_arguments():
 
 	parser = utils.get_argparser()
@@ -339,12 +240,6 @@ if __name__ == "__main__":
 			Xbatch.append(Xfull[lead_idx-history:lead_idx])
 
 		Xbatch = np.array(Xbatch)
-
-		# Convert to window data
-		#Xwindow, Ywindow = event_detector.transform_to_window_data(Xfull, Xfull)
-		#Xval_window_shuf = attack_utils.subsample(Xwindow, 5000)
-		#Xval_expl = Xval_window_shuf
-
 		avg_benign = np.mean(Xbatch, axis=0)
 		baseline = np.expand_dims(avg_benign, axis=0)
 
@@ -370,21 +265,8 @@ if __name__ == "__main__":
 		baseline = None
 		eg_baseline = None
 
-	#################################
-	# Picking threshold for explanation: optimal, lower or per feature
-	#################################
-
-	#Xtrain, Xval, Ytrain, Yval = train_test_split(Xwindow, Ywindow, test_size=0.2, random_state=42, shuffle=True)
-	#Ytest_hat = per_feature_detection(event_detector, Xval, Yval, Xtest, window=1, perfeat=False)
-	# Ytest_hat = np.load(f'{model_name}-Yhat.npy')
-
-	# threshold = args.explain_params_threshold
-	# full_val_errors = event_detector.reconstruction_errors(Xval, batches=True)
-	# theta_low = np.quantile(np.mean(full_val_errors, axis=1), 0.9995)
-	# Ytest_hat = event_detector.detect(Xtest, theta=theta_low, window=10)
-
 	lookup_name = f'{model_name}-{run_name}'
-	detection_points = pickle.load(open('ccs-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	samples = 150
 

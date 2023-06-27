@@ -148,30 +148,6 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 
 	return
 
-def per_feature_detection(event_detector, Xval, Xtest, quant=0.9995, window=10):
-
-	full_val_errors = event_detector.reconstruction_errors(Xval, batches=True)
-	full_test_errors = event_detector.reconstruction_errors(Xtest, batches=True)
-
-	n_sensor = Xtest.shape[1]
-	feature_thresholds = np.zeros(n_sensor)
-	feature_detect = np.zeros_like(full_test_errors)
-	feature_detect_blocklist_idx = [45, 49, 52]
-
-	## Use per-feature detection
-	for i in range(n_sensor):
-
-		feature_thresholds[i] = np.quantile(full_val_errors[:, i], quant)
-
-		if i in feature_detect_blocklist_idx:
-			continue
-		feature_detect[:, i] = full_test_errors[:, i] > feature_thresholds[i]
-
-	full_detection = np.sum(feature_detect, axis=1) > 0
-	window_detection = np.convolve(full_detection, np.ones(window), 'same') // window
-
-	return window_detection
-
 def parse_arguments():
 
 	parser = utils.get_argparser()
@@ -291,44 +267,6 @@ if __name__ == "__main__":
 
 		baseline = None
 		eg_baseline = None
-
-	# #################################
-	# # BASELINE FOR INTEGRATED GRADIENTS
-	# #################################
-
-	# # Clip the prediction to match LSTM prediction window
-	# Xtrain_window, _ = event_detector.transform_to_window_data(Xtrain, Xtrain)
-	# Xtrain_window_shuf = explainer_utils.subsample(Xtrain_window, 50000)
-	# Xtrain_expl = Xtrain_window_shuf
-
-	# avg_benign = np.mean(Xtrain_expl, axis=0)
-	# baseline = np.expand_dims(avg_benign, axis=0)
-
-	# #################################
-	# # BASELINE FOR EXPECTED GRAD
-	# #################################
-
-	# # If using expected gradients, baseline needs to be training examples. We subsample training regions
-	# train_samples = []
-	# num_to_sample = 100
-	# inc = len(Xtrain_window) // num_to_sample
-
-	# for i in range(num_to_sample):
-	# 	train_sample = Xtrain_window[i * inc]
-	# 	train_samples.append(train_sample)
-
-	# eg_baseline = np.array(train_samples)
-
-	#################################
-	# Picking threshold for explanation: optimal, lower or per feature
-	#################################
-
-	# Ytest_hat = per_feature_detection(event_detector, Xval, Xtest)
-
-	# threshold = args.explain_params_threshold
-	# full_val_errors = event_detector.reconstruction_errors(Xval, batches=True)
-	# theta_low = np.quantile(np.mean(full_val_errors, axis=1), 0.9995)
-	# Ytest_hat = event_detector.detect(Xtest, theta=theta_low, window=10)
 
 	lookup_name = f'{model_name}-{run_name}'
 	detection_points = pickle.load(open('ccs-storage/detection-points.pkl', 'rb'))

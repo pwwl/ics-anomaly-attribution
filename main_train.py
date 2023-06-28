@@ -114,7 +114,12 @@ def train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs
 
 def save_model(event_detector, config, run_name='results'):
     model_name = config['name']
-    event_detector.save(f'models/{run_name}/{model_name}')
+    try:
+        event_detector.save(f'models/{run_name}/{model_name}')
+    except FileNotFoundError:
+        event_detector.save(f'models/results/{model_name}')
+        print(f"Directory models/{run_name}/ not found, model {model_name} saved at models/results/ instead")
+        print(f"Note: we recommend creating models/{run_name}/ to store this model")
 
 # functions
 def load_saved_model(model_type, params_filename, model_filename):

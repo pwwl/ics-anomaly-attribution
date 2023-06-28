@@ -109,11 +109,13 @@ if __name__ == "__main__":
 
         ##### Cross Validation
         print('Getting detection errors....')
-        validation_errors = utils.reconstruction_errors_by_idxs(Xfull, val_idxs, history)
+        validation_errors = utils.reconstruction_errors_by_idxs(event_detector, Xfull, val_idxs, history)
         test_errors = event_detector.reconstruction_errors(Xtest, batches=True)
 
         print(f'Avg val err: {np.mean(validation_errors)}')
-        np.save(f'mses-val-{model_name}-{run_name}-{dataset_name}-ns.npy', validation_errors)
-        np.save(f'mses-{model_name}-{run_name}-{dataset_name}-ns.npy', test_errors)
+        np.save(f'mses-val-{model_name}-{run_name}-ns.npy', validation_errors)
+        np.save(f'mses-{model_name}-{run_name}-ns.npy', test_errors)
+        print(f'Saved mses-val-{model_name}-{run_name}-ns.npy')
+        print(f'Saved mses-{model_name}-{run_name}-ns.npy')
 
     print("Finished!")

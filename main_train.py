@@ -92,14 +92,10 @@ def train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs
         event_detector = gru.GatedRecurrentUnit(**model_params)
     elif model_type == 'LSTM':
         event_detector = lstm.LongShortTermMemory(**model_params)
-    elif model_type == 'DNN':
-        event_detector = dnn.DeepNN(**model_params)
     elif model_type == 'CNN':
         event_detector = cnn.ConvNN(**model_params)
     elif model_type == 'LIN':
         event_detector = linear.Linear(**model_params)
-    elif model_type == 'ID':
-        event_detector = identity.Identity(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return
@@ -184,56 +180,33 @@ if __name__ == "__main__":
     }
 
     config = {
-        'grid_search': {
-            'percentile': args.detect_params_percentile,
-            'window': args.detect_params_windows,
-            'metrics': args.detect_params_metrics,
-            'pr-plot': False,
-            'detection-plots': args.detect_params_plots,
-            'save-metric-info': args.detect_params_save_npy
-        }
+        # 'grid_search': {
+        #     'percentile': args.detect_params_percentile,
+        #     'window': args.detect_params_windows,
+        #     'metrics': args.detect_params_metrics,
+        #     'pr-plot': False,
+        #     'detection-plots': args.detect_params_plots,
+        #     'save-metric-info': args.detect_params_save_npy
+        # }
     }
 
     run_name = args.run_name
-    test_split = args.detect_params_test_split
+    # test_split = args.detect_params_test_split
     utils.update_config_model(args, config, model_type, dataset_name)
     model_name = config['name']
 
     Xfull, sensor_cols = load_train_data(dataset_name)
     Xtest, Ytest, _ = load_test_data(dataset_name)
 
-    shuffle = True
-    by_idx = True
-
     history = config['model']['history']
 
-    if by_idx:
-        
-        train_idxs, val_idxs = utils.train_val_history_idx_split(dataset_name, Xfull, history)
+    train_idxs, val_idxs = utils.train_val_history_idx_split(dataset_name, Xfull, history)
 
-        train_params['steps_per_epoch'] = len(train_idxs) // train_params['batch_size']
-        train_params['validation_steps'] = len(val_idxs) // train_params['batch_size']
-        config.update({'train': train_params})
-        
-        event_detector = train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs)
-
-    else:
-
-        if shuffle:
-            # Preprocess the data history
-            Xfull_window, Yfull = utils.transform_to_window_data(Xfull, Xfull, history)
-            Xtrain, Xval, Ytrain, Yval = train_test_split(Xfull_window, Yfull, test_size=0.2, random_state=42, shuffle=True)
-        else:
-            Xtrain_flat, Xval_flat, _, _ = train_test_split(Xfull, Xfull, test_size=0.2, random_state=42, shuffle=False)
-            Xtrain, Ytrain = utils.transform_to_window_data(Xtrain_flat, Xtrain_flat, history)
-            Xval, Yval = utils.transform_to_window_data(Xval_flat, Xval_flat, history)
-
-        train_params['steps_per_epoch'] = len(Xtrain) // train_params['batch_size']
-        train_params['validation_steps'] = len(Xval) // train_params['batch_size']
-        config.update({'train': train_params})
-
-        # Trains and returns the inner event detection model
-        event_detector = train_forecast_model(model_type, config, Xtrain, Xval, Ytrain, Yval)
+    train_params['steps_per_epoch'] = len(train_idxs) // train_params['batch_size']
+    train_params['validation_steps'] = len(val_idxs) // train_params['batch_size']
+    config.update({'train': train_params})
+    
+    event_detector = train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs)
 
     save_model(event_detector, config, run_name=run_name)
 

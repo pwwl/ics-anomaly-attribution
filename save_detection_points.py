@@ -33,11 +33,12 @@ import matplotlib.pyplot as plt
 # Custom local packages
 import attack_utils
 import tep_utils
+import argparse
 
 def get_detection_points(lookup_name, dataset_name):
 
 	history = 50    
-	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-{dataset_name}-ns.npy')
+	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 	test_errors = np.load(f'meta-storage/model-mses/mses-{lookup_name}-{dataset_name}-ns.npy')
 	attacks, labels = attack_utils.get_attack_indices(dataset_name)
 
@@ -76,10 +77,10 @@ def get_detection_points(lookup_name, dataset_name):
 	
 	return detection_lookup, detection_full_lookup
 
-def get_tep_detection_points(lookup_name, dataset_name):
+def get_tep_detection_points(lookup_name):
 
 	history = 50    
-	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-{dataset_name}-ns.npy')
+	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 	validation_instance_errors = np.mean(validation_errors, axis=1)
 
 	footer_list1 = tep_utils.get_footer_list(patterns=['cons'])
@@ -109,34 +110,76 @@ def get_tep_detection_points(lookup_name, dataset_name):
 	
 	return detection_lookup, detection_full_lookup
 
+def parse_arguments():
+    
+    parser = argparse.ArgumentParser()
+	model_choices = set(['CNN', 'GRU', 'LSTM'])
+    data_choices = set(['SWAT', 'WADI', 'TEP'])
+	parser.add_argument("--md", 
+		help="Format as model-dataset-units-history-layers-kernel-runname if model is CNN," +
+			 "format as model-dataset-units-history-layers-runname otherwise",
+		nargs='+')
+
+	lookup_names = []
+	for _, value in parser.parse_args()._get_kwargs():
+    	if value is not None:
+        	vals = value.split("-")
+			numArgs = len(vals)
+			
+			# if incorrect number of arguments
+			if numArgs != 6 and numArgs != 7:
+				raise SystemExit(f"ERROR: Provided incorrectly formatted argument {value}")
+			
+			model_type, dataset, units, history, layers = vals[:5]
+			isTep = False
+			if model_type not in model_choices:
+				raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
+			if dataset not in data_choices:
+				raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
+			if dataset == 'TEP':
+				isTep = True
+			if not units.isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
+			if not history.isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
+			if not layers.isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
+			run_name = vals[:-1]
+			# if model is CNN (has kernel argument)
+			if numArgs == 6:
+				kernel = vals[5]
+				if not kernel.isnumeric():
+					raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
+				name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-{units}-{run_name}"
+			else:
+				name = f"{model_type}-{dataset}-l{layers}-hist{history}-{units}-{run_name}"
+			
+			lookup_names.append((name, isTep))
+	
+	return lookup_names
+				
 
 if __name__ == "__main__":
 
-	datasets = ['SWAT', 'WADI', 'TEP']
-	models = ['CNN', 'GRU', 'LSTM']
-	run_name = 'results_ns1'
-	
+	lookup_tupls = parse_arguments()
+
 	model_detection_lookup = dict()
 	model_detection_full_lookup = dict()
-
-	for dataset_name in datasets:
-		for model_type in models:
-		
-			if model_type == 'CNN':
-				lookup_name = f'CNN-{dataset_name}-l2-hist50-kern3-units64-{run_name}'
-			else:
-				lookup_name = f'{model_type}-{dataset_name}-l2-hist50-units64-{run_name}'
-
-			if dataset_name == 'TEP':
-				detection_lookup, detection_full_lookup = get_tep_detection_points(lookup_name, dataset_name)
-			else:
-				detection_lookup, detection_full_lookup = get_detection_points(lookup_name, dataset_name)
+	
+	for lookup_tupl in lookup_tupls:
 			
-			model_detection_lookup[lookup_name] = detection_lookup
-			model_detection_full_lookup[lookup_name] = detection_full_lookup
+			if lookup_tupl[1] == 'TEP':
+				detection_lookup, detection_full_lookup = get_tep_detection_points(lookup_tupl[0])
+			else:
+				detection_lookup, detection_full_lookup = get_detection_points(lookup_tupl[0], lookup_tupl[1])
+			
+			model_detection_lookup[lookup_tupl[0]] = detection_lookup
+			model_detection_full_lookup[lookup_tupl[0]] = detection_full_lookup
 
 	pickle.dump(model_detection_lookup, open('meta-storage/detection-points.pkl' ,'wb'))
 	pickle.dump(model_detection_full_lookup, open('meta-storage/all-detection-points.pkl' ,'wb'))
+	print("Saved meta-storage/detection-points.pkl")
+	print("Saved meta-storage/all-detection-points.pkl")
 
 	pdb.set_trace()
 

@@ -135,7 +135,7 @@ def get_argparser():
 	
 	parser.add_argument("model", 
 		help="Type of model to use",
-		choices=['LIN', 'CNN', 'GRU', 'LSTM'],
+		choices=['CNN', 'GRU', 'LSTM'],
 		default='CNN')
 
 	parser.add_argument("dataset", 
@@ -247,13 +247,6 @@ def update_config_model(args, config, model_type, dataset_name):
 			'model': lstm_model_params, 
 			'name': f'{model_type}-{dataset_name}-l{args.lstm_model_params_layers}-'+
 					f'hist{args.lstm_model_params_history}-units{args.lstm_model_params_units}' 
-			})
-
-	elif model_type == 'LIN':
-
-		config.update({
-			'model': {'verbose': 1}, 
-			'name': f'{model_type}-{dataset_name}' 
 			})
 
 	return

@@ -47,7 +47,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from tensorflow.keras.models import load_model
 
 # Custom packages
-from detector import lstm, cnn, gru, linear
+from detector import lstm, cnn, gru
 from data_loader import load_train_data, load_test_data
 
 import utils
@@ -66,8 +66,6 @@ def train_forecast_model(model_type, config, Xtrain, Xval, Ytrain, Yval):
         event_detector = lstm.LongShortTermMemory(**model_params)
     elif model_type == 'CNN':
         event_detector = cnn.ConvNN(**model_params)
-    elif model_type == 'LIN':
-        event_detector = linear.Linear(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return
@@ -94,8 +92,6 @@ def train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs
         event_detector = lstm.LongShortTermMemory(**model_params)
     elif model_type == 'CNN':
         event_detector = cnn.ConvNN(**model_params)
-    elif model_type == 'LIN':
-        event_detector = linear.Linear(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return
@@ -131,8 +127,6 @@ def load_saved_model(model_type, params_filename, model_filename):
         event_detector = lstm.LongShortTermMemory(**model_params)
     elif model_type == 'GRU':
         event_detector = gru.GatedRecurrentUnit(**model_params)
-    elif model_type == 'LIN':
-        event_detector = linear.Linear(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return None

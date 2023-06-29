@@ -111,10 +111,10 @@ def get_tep_detection_points(lookup_name):
 	return detection_lookup, detection_full_lookup
 
 def parse_arguments():
-    
-    parser = argparse.ArgumentParser()
+	
+	parser = argparse.ArgumentParser()
 	model_choices = set(['CNN', 'GRU', 'LSTM'])
-    data_choices = set(['SWAT', 'WADI', 'TEP'])
+	data_choices = set(['SWAT', 'WADI', 'TEP'])
 	parser.add_argument("--md", 
 		help="Format as model-dataset-units-history-layers-kernel-runname if model is CNN," +
 			 "format as model-dataset-units-history-layers-runname otherwise",
@@ -122,8 +122,8 @@ def parse_arguments():
 
 	lookup_names = []
 	for _, value in parser.parse_args()._get_kwargs():
-    	if value is not None:
-        	vals = value.split("-")
+		if value is not None:
+			vals = value.split("-")
 			numArgs = len(vals)
 			
 			# if incorrect number of arguments
@@ -146,7 +146,7 @@ def parse_arguments():
 				raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
 			run_name = vals[:-1]
 			# if model is CNN (has kernel argument)
-			if numArgs == 6:
+			if numArgs == 7:
 				kernel = vals[5]
 				if not kernel.isnumeric():
 					raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")

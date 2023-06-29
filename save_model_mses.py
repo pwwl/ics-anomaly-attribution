@@ -88,7 +88,7 @@ if __name__ == "__main__":
         validation_errors = utils.reconstruction_errors_by_idxs(Xfull, val_idxs, history)
         print(f'Avg val err: {np.mean(validation_errors)}')
 
-        np.save(f'mses-val-{model_name}-{run_name}-{dataset_name}-ns.npy', validation_errors)
+        np.save(f'meta-storage/model-mses/mses-val-{model_name}-{run_name}-ns.npy', validation_errors)
         footers = tep_utils.get_footer_list(patterns=['cons'])
         
         # For TEP, we do each attack separate, since they are in separate files
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             print(f'scoring {attack_footer} on {model_name} {run_name}')
             Xtest, _, _ = tep_utils.load_tep_attack(dataset_name, attack_footer)
             test_errors = event_detector.reconstruction_errors(Xtest, batches=True, verbose=0)
-            np.save(f'mses-{model_name}-{run_name}-{attack_footer}-ns.npy', test_errors)
+            np.save(f'meta-storage/model-mses/mses-{model_name}-{run_name}-{attack_footer}-ns.npy', test_errors)
 
     else:
     
@@ -113,9 +113,9 @@ if __name__ == "__main__":
         test_errors = event_detector.reconstruction_errors(Xtest, batches=True)
 
         print(f'Avg val err: {np.mean(validation_errors)}')
-        np.save(f'mses-val-{model_name}-{run_name}-ns.npy', validation_errors)
-        np.save(f'mses-{model_name}-{run_name}-ns.npy', test_errors)
-        print(f'Saved mses-val-{model_name}-{run_name}-ns.npy')
-        print(f'Saved mses-{model_name}-{run_name}-ns.npy')
+        np.save(f'meta-storage/model-mses/mses-val-{model_name}-{run_name}-ns.npy', validation_errors)
+        np.save(f'meta-storage/model-mses/mses-{model_name}-{run_name}-ns.npy', test_errors)
+        print(f'Saved meta-storage/model-mses/mses-val-{model_name}-{run_name}-ns.npy')
+        print(f'Saved meta-storage/model-mses/mses-{model_name}-{run_name}-ns.npy')
 
     print("Finished!")

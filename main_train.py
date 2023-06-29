@@ -174,18 +174,9 @@ if __name__ == "__main__":
     }
 
     config = {
-        # 'grid_search': {
-        #     'percentile': args.detect_params_percentile,
-        #     'window': args.detect_params_windows,
-        #     'metrics': args.detect_params_metrics,
-        #     'pr-plot': False,
-        #     'detection-plots': args.detect_params_plots,
-        #     'save-metric-info': args.detect_params_save_npy
-        # }
     }
 
     run_name = args.run_name
-    # test_split = args.detect_params_test_split
     utils.update_config_model(args, config, model_type, dataset_name)
     model_name = config['name']
 

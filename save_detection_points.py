@@ -18,7 +18,6 @@
 # Generic python
 from typing import Dict, List
 import pickle
-import pdb
 import sys
 
 # Ignore ugly futurewarnings from np vs tf.
@@ -39,7 +38,7 @@ def get_detection_points(lookup_name, dataset_name):
 
 	history = 50    
 	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
-	test_errors = np.load(f'meta-storage/model-mses/mses-{lookup_name}-{dataset_name}-ns.npy')
+	test_errors = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
 	attacks, labels = attack_utils.get_attack_indices(dataset_name)
 
 	validation_instance_errors = np.mean(validation_errors, axis=1)
@@ -58,13 +57,6 @@ def get_detection_points(lookup_name, dataset_name):
 
 		attack_region = test_instance_errors[att_start:att_end]    
 
-		# fig, ax = plt.subplots(1, 1, figsize=(8, 5))
-		# ax.plot(attack_region)
-		# ax.hlines(cutoff, xmin=0, xmax=len(attack_region), colors='red', linestyles='dashed')
-		# ax.set_title(f'{dataset_name} attack {atk_idx}')
-		# plt.savefig(f'{lookup_name}-attack{atk_idx}.png')
-		# plt.close()
-
 		if np.sum(attack_region > cutoff) > 0:
 			det_point = np.min(np.where(attack_region > cutoff)[0])
 			detection_lookup[atk_idx] = det_point
@@ -72,8 +64,6 @@ def get_detection_points(lookup_name, dataset_name):
 			print(f'{lookup_name} detected atk {atk_idx} length {len(attack_idxs)} at point {det_point}')
 		else:
 			print(f'{lookup_name} missed atk {atk_idx}')
-
-		#pdb.set_trace()
 	
 	return detection_lookup, detection_full_lookup
 
@@ -116,45 +106,44 @@ def parse_arguments():
 	model_choices = set(['CNN', 'GRU', 'LSTM'])
 	data_choices = set(['SWAT', 'WADI', 'TEP'])
 	parser.add_argument("--md", 
-		help="Format as model-dataset-units-history-layers-kernel-runname if model is CNN," +
-			 "format as model-dataset-units-history-layers-runname otherwise",
+		help="Format as model-dataset-layers-history-kernel-units-runname if model is CNN," +
+			 "format as model-dataset-layers-history-units-runname otherwise",
 		nargs='+')
 
 	lookup_names = []
-	for _, value in parser.parse_args()._get_kwargs():
-		if value is not None:
-			vals = value.split("-")
-			numArgs = len(vals)
-			
-			# if incorrect number of arguments
-			if numArgs != 6 and numArgs != 7:
-				raise SystemExit(f"ERROR: Provided incorrectly formatted argument {value}")
-			
-			model_type, dataset, units, history, layers = vals[:5]
-			isTep = False
-			if model_type not in model_choices:
-				raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
-			if dataset not in data_choices:
-				raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
-			if dataset == 'TEP':
-				isTep = True
-			if not units.isnumeric():
-				raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
-			if not history.isnumeric():
-				raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
-			if not layers.isnumeric():
-				raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
-			run_name = vals[:-1]
-			# if model is CNN (has kernel argument)
-			if numArgs == 7:
-				kernel = vals[5]
-				if not kernel.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
-				name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-{units}-{run_name}"
-			else:
-				name = f"{model_type}-{dataset}-l{layers}-hist{history}-{units}-{run_name}"
-			
-			lookup_names.append((name, isTep))
+	for _, args in parser.parse_args()._get_kwargs():
+		if args is not None:
+			for arg in args:
+				vals = arg.split("-")
+				numArgs = len(vals)
+				
+				# if incorrect number of arguments
+				if numArgs != 6 and numArgs != 7:
+					raise SystemExit(f"ERROR: Provided incorrectly formatted argument {value}")
+				
+				model_type, dataset, layers, history = vals[:4]
+				units = vals[-2]
+				if model_type not in model_choices:
+					raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
+				if dataset not in data_choices:
+					raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
+				if not units.isnumeric():
+					raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
+				if not history.isnumeric():
+					raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
+				if not layers.isnumeric():
+					raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
+				run_name = vals[-1]
+				# if model is CNN (has kernel argument)
+				if numArgs == 7:
+					kernel = vals[4]
+					if not kernel.isnumeric():
+						raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
+					name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-units{units}-{run_name}"
+				else:
+					name = f"{model_type}-{dataset}-l{layers}-hist{history}-units{units}-{run_name}"
+				
+				lookup_names.append((name, dataset))
 	
 	return lookup_names
 				
@@ -180,7 +169,4 @@ if __name__ == "__main__":
 	pickle.dump(model_detection_full_lookup, open('meta-storage/all-detection-points.pkl' ,'wb'))
 	print("Saved meta-storage/detection-points.pkl")
 	print("Saved meta-storage/all-detection-points.pkl")
-
-	pdb.set_trace()
-
-	print(f"Finished")
+	print(f"Finished!")

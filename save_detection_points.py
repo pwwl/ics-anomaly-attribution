@@ -119,7 +119,7 @@ def parse_arguments():
 				
 				# if incorrect number of arguments
 				if numArgs != 6 and numArgs != 7:
-					raise SystemExit(f"ERROR: Provided incorrectly formatted argument {value}")
+					raise SystemExit(f"ERROR: Provided incorrectly formatted argument {arg}")
 				
 				model_type, dataset, layers, history = vals[:4]
 				units = vals[-2]

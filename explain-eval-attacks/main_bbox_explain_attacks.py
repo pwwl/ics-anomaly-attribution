@@ -85,7 +85,7 @@ def explain_true_position(event_detector, lookup_name, attacks, Xtest, method='M
 
 			full_scores[i] = exp_output
 
-		pickle.dump(full_scores, open(f'explanations-{method}-{lookup_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
+		pickle.dump(full_scores, open(f'explanations-dir/explain23-pkl/explanations-{method}-{lookup_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
 
 	return
 
@@ -130,7 +130,7 @@ def explain_detect(event_detector, lookup_name, attacks, Xtest, detection_points
 
 				full_scores[i] = exp_output
 
-			pickle.dump(full_scores, open(f'explanations-{method}-{lookup_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+			pickle.dump(full_scores, open(f'explanations-dir/explain23-pkl/explanations-{method}-{lookup_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
 		
 		else:
 

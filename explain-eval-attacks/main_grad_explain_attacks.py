@@ -89,7 +89,7 @@ def explain_true_position(event_detector, run_name, model_name, explainer, Xtest
 		if count >= num_samples:
 			break
 
-	pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
+	pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
 
 	return
 
@@ -139,7 +139,7 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 			if count >= num_samples:
 				break
 
-		pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+		pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
 
 	else:
 		print(f'Attack {attack_idx} was missed')
@@ -169,6 +169,11 @@ def parse_arguments():
 		default=0,
 		type=float,
 		help="Percentile threshold for selecting candidates for explanation. 0 (default) chooses optimal.")
+	
+	parser.add_argument("--num_samples",
+		default=150,
+		type=int,
+		help="Number of samples")
 
 	return parser.parse_args()
 
@@ -268,7 +273,7 @@ if __name__ == "__main__":
 	lookup_name = f'{model_name}-{run_name}'
 	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
-	samples = 150
+	samples = args.num_samples
 
 	# Each explanation method in outer loop
 	for code, expl in explainers:

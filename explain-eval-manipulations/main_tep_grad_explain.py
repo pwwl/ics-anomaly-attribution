@@ -288,10 +288,10 @@ if __name__ == "__main__":
 		print('======================')
 
 		if code == 'EG':
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_footer, num_samples=5)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_footer, num_samples=num_samples)
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_footer, model_detection_points, num_samples=num_samples)
 		else:
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_footer, num_samples=5)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_footer, num_samples=num_samples)
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, baseline, attack_footer, model_detection_points, num_samples=num_samples)
 
 	print("Finished!")

@@ -46,9 +46,10 @@ from sklearn.metrics import roc_curve, precision_recall_curve
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from tensorflow.keras.models import load_model
 import tensorflow as tf
+
 # Need to train model w/TF1 because SHAP incompatible with TF2 https://github.com/slundberg/shap/issues/85
-tf.compat.v1.disable_v2_behavior()
-tf.compat.v1.disable_eager_execution()
+#tf.compat.v1.disable_v2_behavior()
+#tf.compat.v1.disable_eager_execution()
 
 # Custom packages
 from detector import lstm, cnn, gru

@@ -33,7 +33,6 @@ import sys
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow as tf
-tf.compat.v1.disable_v2_behavior()
 
 from sklearn.model_selection import train_test_split
 

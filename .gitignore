@@ -1,7 +1,11 @@
 
 __pycache__
 
+# Intermediate outputs
 *.pdf
 *.png
 *.pkl
 *.npy
+*.h5
+*.json
+

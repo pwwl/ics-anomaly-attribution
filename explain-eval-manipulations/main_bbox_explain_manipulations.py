@@ -1,3 +1,20 @@
+"""
+
+   Copyright 2023 Lujo Bauer, Clement Fung
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+	   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+"""
 
 import lime
 import networkx as nx
@@ -40,7 +57,6 @@ def explain_true_position(event_detector, lookup_name, attack_footer, Xtest, met
 	else:
 		full_scores = np.zeros((num_samples, nsensors))
 
-	# TODO: modified to start from history for now here
 	# att_start = 10000 + history
 	att_start = 10000
 
@@ -65,7 +81,7 @@ def explain_true_position(event_detector, lookup_name, attack_footer, Xtest, met
 
 		full_scores[i] = exp_output
 
-	pickle.dump(full_scores, open(f'explanations-{method}-{lookup_name}-{attack_footer}-true{num_samples}.pkl', 'wb'))
+	pickle.dump(full_scores, open(f'explanations-dir/explain23-pkl/explanations-{method}-{lookup_name}-{attack_footer}-true{num_samples}.pkl', 'wb'))
 
 	return
 
@@ -81,7 +97,6 @@ def explain_detect(event_detector, lookup_name, attack_footer, Xtest, method='MS
 	else:
 		full_scores = np.zeros((num_samples, nsensors))
 
-	# TODO: modified to start from beginning, since detect_idx accounts for history
 	att_start = 10000
 	
 	print('============================')
@@ -105,7 +120,7 @@ def explain_detect(event_detector, lookup_name, attack_footer, Xtest, method='MS
 
 		full_scores[i] = exp_output
 
-	pickle.dump(full_scores, open(f'explanations-{method}-{lookup_name}-{attack_footer}-detect{num_samples}.pkl', 'wb'))
+	pickle.dump(full_scores, open(f'explanations-dir/explain23-pkl/explanations-{method}-{lookup_name}-{attack_footer}-detect{num_samples}.pkl', 'wb'))
 
 	return
 
@@ -116,6 +131,11 @@ def parse_arguments():
 	parser.add_argument("--explain_params_methods",
         choices=['MSE', 'LIME', 'SHAP', 'LEMNA'],
         default='AE')
+	
+	parser.add_argument("--num_samples",
+		default=5,
+		type=int,
+		help="Number of samples")
 
 	return parser.parse_args()
 
@@ -139,7 +159,7 @@ if __name__ == "__main__":
 	history = event_detector.params['history']
 
 	lookup_name = f'{model_name}-{run_name}'
-	num_samples = 150
+	num_samples = args.num_samples
 
 	if exp_method == 'SHAP':
 		Xfull, sensor_cols = load_train_data(dataset_name)
@@ -148,7 +168,7 @@ if __name__ == "__main__":
 	else:
 		expl = None
 
-	detection_points = pickle.load(open('ccs-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	attack_footers = get_footer_list(patterns=['cons'])
 	

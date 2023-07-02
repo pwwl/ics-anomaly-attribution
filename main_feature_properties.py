@@ -25,7 +25,7 @@ DEFAULT_CMAP = plt.get_cmap('Reds', 5)
 HOUR = 2000
 SCALE = 1
 
-def make_detect_plot_obj(lookup_tupls):
+def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 
 	all_dfs = []
 	all_plots = []
@@ -40,6 +40,10 @@ def make_detect_plot_obj(lookup_tupls):
 		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		sds = get_attack_sds(dataset)
+		sds_to_consider = []
+		for sd in sds:
+			if sd[0] in attacks_to_consider:
+				sds_to_consider.append(sd)
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
 		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
@@ -47,8 +51,7 @@ def make_detect_plot_obj(lookup_tupls):
 		print(f'for {lookup_name}')
 		print(f'avg_val_mse: {np.mean(val_mses)}')
 
-		scatter_obj = np.zeros((len(sds), 6))
-		first_scatter_obj = np.zeros((len(sds), 4))
+		first_scatter_obj = np.zeros((len(sds_to_consider), 4))
 		
 		labels_list = []
 		multi_list = []
@@ -57,9 +60,9 @@ def make_detect_plot_obj(lookup_tupls):
 		pattern_list = []
 		detect_list = []
 
-		for sd_idx in range(len(sds)):
+		for sd_idx in range(len(sds_to_consider)):
 			
-			sd_obj = sds[sd_idx]
+			sd_obj = sds_to_consider[sd_idx]
 			atk_idx = sd_obj[0]
 			label = sd_obj[1]
 			is_multi = sd_obj[3]
@@ -92,7 +95,6 @@ def make_detect_plot_obj(lookup_tupls):
 			first_shap_ranking = scores_to_rank(first_shap, col_idx)
 			first_lemna_ranking = scores_to_rank(first_lemna, col_idx)
 
-			scatter_obj[sd_idx, 0] = sd
 			first_scatter_obj[sd_idx, 0] = first_ranking
 			first_scatter_obj[sd_idx, 1] = first_sm_ranking
 			first_scatter_obj[sd_idx, 2] = first_shap_ranking
@@ -124,7 +126,6 @@ def make_detect_plot_obj(lookup_tupls):
 			'sensor_type': sensor_types_list,
 			'val_type': val_types_list,
 			'sd_type': pattern_list,
-			'sd': scatter_obj[det_idx,0],
 			'is_multi': multi_list,
 			'detect_point': detect_list,
 			'mse_ranking': first_scatter_obj[det_idx,0],
@@ -135,9 +136,9 @@ def make_detect_plot_obj(lookup_tupls):
 
 		pdb.set_trace()
 
-		pickle.dump(df, open(f'realdet-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/realdet-{lookup_name}.pkl', 'wb'))
 
-def make_detect_timing(lookup_tupls):
+def make_detect_timing(lookup_tupls, attacks_to_consider):
 
 	all_dfs = []
 	all_plots = []
@@ -153,6 +154,10 @@ def make_detect_timing(lookup_tupls):
 		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		sds = get_attack_sds(dataset)
+		sds_to_consider = []
+		for sd in sds:
+			if sd[0] in attacks_to_consider:
+				sds_to_consider.append(sd)
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
 		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
@@ -160,7 +165,7 @@ def make_detect_timing(lookup_tupls):
 		print(f'for {lookup_name}')
 		print(f'avg_val_mse: {np.mean(val_mses)}')
 
-		scatter_obj = np.zeros((len(sds), 16))
+		scatter_obj = np.zeros((len(sds_to_consider), 16))
 		
 		labels_list = []
 		multi_list = []
@@ -169,11 +174,11 @@ def make_detect_timing(lookup_tupls):
 		pattern_list = []
 		detect_list = []
 		length_list = []
-		full_slice_values = np.zeros((len(sds), 150, ncols, 4))
+		full_slice_values = np.zeros((len(sds_to_consider), 150, ncols, 4))
 
-		for sd_idx in range(len(sds)):
+		for sd_idx in range(len(sds_to_consider)):
 			
-			sd_obj = sds[sd_idx]
+			sd_obj = sds_to_consider[sd_idx]
 			atk_idx = sd_obj[0]
 			label = sd_obj[1]
 			is_multi = sd_obj[3]
@@ -314,10 +319,10 @@ def make_detect_timing(lookup_tupls):
 
 		pdb.set_trace()
 
-		pickle.dump(df, open(f'real-timing-{lookup_name}.pkl', 'wb'))
-		pickle.dump(full_slice_values, open(f'full-values-real-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/real-timing-{lookup_name}.pkl', 'wb'))
+		pickle.dump(full_slice_values, open(f'meta-storage/full-values-real-{lookup_name}.pkl', 'wb'))
 
-def make_ideal_plot_obj(lookup_tupls):
+def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 
 	all_dfs = []
 	all_plots = []
@@ -329,6 +334,10 @@ def make_ideal_plot_obj(lookup_tupls):
 
 		attacks, labels = get_attack_indices(dataset)
 		sds = get_attack_sds(dataset)
+		sds_to_consider = []
+		for sd in sds:
+			if sd[0] in attacks_to_consider:
+				sds_to_consider.append(sd)
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
 		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
@@ -336,8 +345,7 @@ def make_ideal_plot_obj(lookup_tupls):
 		print(f'for {lookup_name}')
 		print(f'avg_val_mse: {np.mean(val_mses)}')
 
-		scatter_obj = np.zeros((len(sds), 6))
-		first_scatter_obj = np.zeros((len(sds), 4))
+		first_scatter_obj = np.zeros((len(sds_to_consider), 4))
 		
 		labels_list = []
 		multi_list = []
@@ -345,18 +353,18 @@ def make_ideal_plot_obj(lookup_tupls):
 		val_type_list = []
 		pattern_list = []
 
-		for sd_idx in range(len(sds)):
-			sd_obj = sds[sd_idx]
+		for sd_idx in range(len(sds_to_consider)):
+			sd_obj = sds_to_consider[sd_idx]
 			atk_idx = sd_obj[0]
 			label = sd_obj[1]
 			is_multi = sd_obj[3]
 			sd = np.abs(sd_obj[4])
 			col_idx = sensor_cols.index(label)
 
-			att_start = np.min(attacks[atk_idx]) - history - 1
+			att_start = np.min(attacks[atk_idx][0]) - history - 1
 			att_end = np.max(attacks[atk_idx]) - history - 1
 
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-true150.pkl', 'rb')) 
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) # CHANGE THIS TO true5
 			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-SHAP-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) 
 			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) 
 
@@ -364,15 +372,9 @@ def make_ideal_plot_obj(lookup_tupls):
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
-			avg_mses = np.mean(all_mses[att_start+50:att_start+150], axis=0)
-			avg_smap = np.mean(smap_scores[51:], axis=0)
-			avg150_smap = np.mean(smap_scores, axis=0)
-			pre_mses = all_mses[att_start]
-			pre_sm = smap_scores[0]
-
 			# Ignoring detections
 			first_mses = all_mses[att_start+history]
-			first_sm = smap_scores[51]
+			first_sm = smap_scores[0]											# 51 OR 0? PROBABLY 0
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
 
@@ -382,13 +384,6 @@ def make_ideal_plot_obj(lookup_tupls):
 			first_lemna_ranking = scores_to_rank(first_lemna, col_idx)
 
 			print(f'Attack {sd_obj}: MSE-Rank {first_ranking}, SM-Rank {first_sm_ranking}, SHAP-Rank {first_shap_ranking}, LEMNA-Rank {first_lemna_ranking}')
-
-			scatter_obj[sd_idx, 0] = sd
-			scatter_obj[sd_idx, 1] = scores_to_rank(avg_mses, col_idx)
-			scatter_obj[sd_idx, 2] = scores_to_rank(avg_smap, col_idx)
-			scatter_obj[sd_idx, 3] = scores_to_rank(pre_mses, col_idx)
-			scatter_obj[sd_idx, 4] = scores_to_rank(pre_sm, col_idx)
-			scatter_obj[sd_idx, 5] = scores_to_rank(avg150_smap, col_idx)
 
 			first_scatter_obj[sd_idx, 0] = first_ranking
 			first_scatter_obj[sd_idx, 1] = first_sm_ranking
@@ -406,46 +401,29 @@ def make_ideal_plot_obj(lookup_tupls):
 			multi_list.append(is_multi)
 			pattern_list.append(sd_obj[2])
 
+		print(first_scatter_obj)
 		print('------------------------')
 		print(f'Average first MSE ranking: {np.mean(first_scatter_obj[:,0])}')
 		print(f'Average first sm ranking: {np.mean(first_scatter_obj[:,1])}')
 		print(f'Average first SHAP ranking: {np.mean(first_scatter_obj[:,2])}')
 		print(f'Average first LEMNA ranking: {np.mean(first_scatter_obj[:,3])}')
 		print('------------------------')
-		print('------------------------')
-		print(f'Avg100 ranking: {np.mean(scatter_obj[:,1])}')
-		print(f'Avg100 sm ranking: {np.mean(scatter_obj[:,2])}')
-		print(f'Avg150 sm ranking: {np.mean(scatter_obj[:,5])}')
-		print(f'Pre MSE ranking: {np.mean(scatter_obj[:,3])}')
-		print(f'Pre sm ranking: {np.mean(scatter_obj[:,4])}')
-		print('------------------------')
 
 		df = pd.DataFrame({
 			'sensor': labels_list,
 			'sensor_type': sensor_types_list,
 			'val_type': val_type_list,
-			'sd_type': pattern_list,
-			'sd': scatter_obj[:,0],
+			'sd_type': pattern_list,	
 			'is_multi': multi_list,
 			'mse_ranking': first_scatter_obj[:,0],
 			'sm_ranking': first_scatter_obj[:,1],
 			'shap_ranking': first_scatter_obj[:,2],
 			'lemna_ranking': first_scatter_obj[:,3],
-			'avg100_mse_ranking': scatter_obj[:,1],
-			'avg100_sm_ranking': scatter_obj[:,2],
-			'avg150_smap_ranking': scatter_obj[:,5],
-			'pre_mse_ranking': scatter_obj[:,3],
-			'pre_sm_ranking': scatter_obj[:,4],
 		})
 
-		pickle.dump(df, open(f'idealdet-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/model-detection-ranks/idealdet-{lookup_name}.pkl', 'wb'))
 
-def make_timing_plot_obj(lookup_tupls):
-
-	history = 50
-	run_name = 'results_ns1'
-	datasets = ['SWAT', 'WADI']
-	model = 'GRU'
+def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
 		
 	for lookup_name, dataset, history in lookup_tupls:
 
@@ -455,6 +433,10 @@ def make_timing_plot_obj(lookup_tupls):
 		print(f'Processing {dataset} dataset')
 		attacks, labels = get_attack_indices(dataset)
 		sds = get_attack_sds(dataset)
+		sds_to_consider = []
+		for sd in sds:
+			if sd[0] in attacks_to_consider:
+				sds_to_consider.append(sd)
 		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 
@@ -467,8 +449,8 @@ def make_timing_plot_obj(lookup_tupls):
 		print(f'for {lookup_name}')
 		print(f'avg_val_mse: {np.mean(val_mses)}')
 
-		full_slice_values = np.zeros((len(sds), 150, ncols, 4))
-		scatter_obj = np.zeros((len(sds), 16))
+		full_slice_values = np.zeros((len(sds_to_consider), 150, ncols, 4))
+		scatter_obj = np.zeros((len(sds_to_consider), 16))
 		
 		labels_list = []
 		multi_list = []
@@ -479,8 +461,8 @@ def make_timing_plot_obj(lookup_tupls):
 		detect_point_list = []
 		length_list = []
 
-		for sd_idx in range(len(sds)):
-			sd_obj = sds[sd_idx]
+		for sd_idx in range(len(sds_to_consider)):
+			sd_obj = sds_to_consider[sd_idx]
 			atk_idx = sd_obj[0]
 			label = sd_obj[1]
 			is_multi = sd_obj[3]
@@ -631,63 +613,69 @@ def make_timing_plot_obj(lookup_tupls):
 		})
 
 		pickle.dump(df, open(f'timing-{lookup_name}.pkl', 'wb'))
-		pickle.dump(full_slice_values, open(f'full-values-{lookup_name}.pkl', 'wb'))
+		pickle.dump(full_slice_values, open(f'meta-storage/full-values-{lookup_name}.pkl', 'wb'))
 
 def parse_arguments():
 	
 	parser = argparse.ArgumentParser()
 	model_choices = set(['CNN', 'GRU', 'LSTM'])
 	data_choices = set(['SWAT', 'WADI'])
+
+	parser.add_argument("attack",
+		help="Which attack to explore?",
+		type=int,
+		nargs='+')
+	
 	parser.add_argument("--md", 
 		help="Format as model-dataset-layers-history-kernel-units-runname if model is CNN," +
 			 "format as model-dataset-layers-history-units-runname otherwise",
 		nargs='+')
 
 	lookup_names = []
-	for _, args in parser.parse_args()._get_kwargs():
-		if args is not None:
-			for arg in args:
-				vals = arg.split("-")
-				numArgs = len(vals)
-				
-				# if incorrect number of arguments
-				if numArgs != 6 and numArgs != 7:
-					raise SystemExit(f"ERROR: Provided incorrectly formatted argument {arg}")
-				
-				model_type, dataset, layers, history = vals[:4]
-				units = vals[-2]
-				if model_type not in model_choices:
-					raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
-				if dataset not in data_choices:
-					raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
-				if not units.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
-				if not history.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
-				if not layers.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
-				run_name = vals[-1]
-				# if model is CNN (has kernel argument)
-				if numArgs == 7:
-					kernel = vals[4]
-					if not kernel.isnumeric():
-						raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
-					name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-units{units}-{run_name}"
-				else:
-					name = f"{model_type}-{dataset}-l{layers}-hist{history}-units{units}-{run_name}"
-				
-				lookup_names.append((name, dataset, history))
-	
-	return lookup_names
+	print(parser.parse_args().md)
+	for arg in parser.parse_args().md:
+		vals = arg.split("-")
+		numArgs = len(vals)
+		
+		# if incorrect number of arguments
+		if numArgs != 6 and numArgs != 7:
+			raise SystemExit(f"ERROR: Provided incorrectly formatted argument {arg}")
+		
+		model_type, dataset, layers, history = vals[:4]
+		units = vals[-2]
+		if model_type not in model_choices:
+			raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
+		if dataset not in data_choices:
+			raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
+		if not units.isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
+		if not history.isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
+		if not layers.isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
+		run_name = vals[-1]
+		# if model is CNN (has kernel argument)
+		if numArgs == 7:
+			kernel = vals[4]
+			if not kernel.isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
+			name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-units{units}-{run_name}"
+		else:
+			name = f"{model_type}-{dataset}-l{layers}-hist{history}-units{units}-{run_name}"
+		
+		lookup_names.append((name, dataset, int(history)))
+
+	return lookup_names, set(parser.parse_args().attack)
 
 if __name__ == "__main__":
 
-	lookup_tupls = parse_arguments()
 
-	make_ideal_plot_obj(lookup_tupls)
-	make_detect_plot_obj(lookup_tupls)
+	lookup_tupls, attacks = parse_arguments()
+
+	make_ideal_plot_obj(lookup_tupls, attacks)
+	make_detect_plot_obj(lookup_tupls, attacks)
 	
-	make_timing_plot_obj(lookup_tupls)
-	make_detect_timing(lookup_tupls)
+	make_timing_plot_obj(lookup_tupls, attacks)
+	make_detect_timing(lookup_tupls, attacks)
 
 	print('Done')

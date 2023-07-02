@@ -642,7 +642,7 @@ def parse_arguments():
 
 		if model_type not in model_choices:
 			raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
-		if dataset not in data_choices:
+		if dataset not in dataset_choices:
 			raise SystemExit(f"ERROR: Provided invalid dataset name {dataset}")
 		if not units.startswith("units") or not units[len("units"):].isnumeric():
 			raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {units}")
@@ -657,7 +657,7 @@ def parse_arguments():
 			if not kernel.startswith("kern") or not kernel[len("kern"):].isnumeric():
 				raise SystemExit(f"ERROR: Provided invalid kernel size {kernel}")
 		
-		lookup_names.append((arg, dataset, int(history)))
+		lookup_names.append((arg, int(history[len("hist"):])))
 
 	return lookup_names, set(parser.parse_args().attack)
 

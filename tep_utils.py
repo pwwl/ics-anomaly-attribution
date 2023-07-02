@@ -83,7 +83,11 @@ def get_footer_list(patterns=None, mags=None, locations=None):
 			for loc in locations:
 					footer = f'{ap}_{am}_{loc}'
 					if footer not in get_skip_list():
-						footers.append(footer)
+						try:
+							pd.read_csv(f"tep-attacks/matlab/TEP_test_{footer}.csv", dayfirst=True)
+							footers.append(footer)
+						except FileNotFoundError:
+							continue
 
 	return footers
 

@@ -85,10 +85,11 @@ if __name__ == "__main__":
 
         ##### Cross Validation
         print('Getting detection errors....')
-        validation_errors = utils.reconstruction_errors_by_idxs(Xfull, val_idxs, history)
+        validation_errors = utils.reconstruction_errors_by_idxs(event_detector, Xfull, val_idxs, history)
         print(f'Avg val err: {np.mean(validation_errors)}')
 
         np.save(f'meta-storage/model-mses/mses-val-{model_name}-{run_name}-ns.npy', validation_errors)
+        print(f'Saved meta-storage/model-mses/mses-val-{model_name}-{run_name}-ns.npy')
         footers = tep_utils.get_footer_list(patterns=['cons'])
         
         # For TEP, we do each attack separate, since they are in separate files
@@ -98,6 +99,7 @@ if __name__ == "__main__":
             Xtest, _, _ = tep_utils.load_tep_attack(dataset_name, attack_footer)
             test_errors = event_detector.reconstruction_errors(Xtest, batches=True, verbose=0)
             np.save(f'meta-storage/model-mses/mses-{model_name}-{run_name}-{attack_footer}-ns.npy', test_errors)
+            print(f'Saved meta-storage/model-mses/mses-val-{model_name}-{run_name}-{attack_footer}-ns.npy')
 
     else:
     

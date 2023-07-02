@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-mkdir meta-storage
-mkdir meta-storage/model-detection-ranks
-mkdir meta-storage/model-mses
-mkdir explanations-dir
-mkdir explanations-dir/explain23-detect-pkl
-mkdir explanations-dir/explain23-pkl
+mkdir -p meta-storage
+mkdir -p meta-storage/model-detection-ranks
+mkdir -p meta-storage/model-mses
+mkdir -p explanations-dir
+mkdir -p explanations-dir/explain23-detect-pkl
+mkdir -p explanations-dir/explain23-pkl

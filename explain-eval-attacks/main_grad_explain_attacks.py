@@ -25,8 +25,7 @@ import sys
 
 # Ignore ugly futurewarnings from np vs tf.
 import warnings
-#warnings.filterwarnings('ignore',category=FutureWarning)
-warnings.filterwarnings("ignore")
+warnings.filterwarnings('ignore',category=FutureWarning)
 
 from sklearn.model_selection import train_test_split
 

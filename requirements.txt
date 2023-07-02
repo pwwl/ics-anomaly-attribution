@@ -11,4 +11,5 @@ scipy==1.4.1
 seaborn
 shap==0.36.0
 six==1.15.0
-tensorflow
+tensorflow==1.14.0
+protobuf==3.20.*

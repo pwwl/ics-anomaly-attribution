@@ -102,7 +102,6 @@ def make_beta_plot(realdet=False, use_skips=False):
 							if is_actuator(ds, sensor_cols[k]):
 								slice_weighted_avg[i,k] = slice[i,k,0] + beta_val * slice[i,k,1] + beta_val * slice[i,k,2]
 							else:
-								#slice_weighted_avg[i,k] = beta_val * slice[i,k,0] + (1 / beta_val) * slice[i,k,1] + (1 / beta_val) * slice[i,k,2]
 								slice_weighted_avg[i,k] = slice[i,k,0] + slice[i,k,1] + slice[i,k,2]
 
 						ranking_wavg_of_methods[i,bx] = tep_utils.scores_to_rank(slice_weighted_avg[i], col_idx)
@@ -138,21 +137,15 @@ def make_beta_plot(realdet=False, use_skips=False):
 
 		ax.set_xlabel('Beta value', fontsize=32)
 		ax.set_ylabel('Normalized AvgRank', fontsize=32)
-		#ax.legend(ncols=3, fontsize=24, loc='lower center', bbox_to_anchor=(0.5, 1))
 		ax.legend(ncols=3, fontsize=28)
 
 		if realdet and use_skips:
-			#ax.set_title('Beta-weighted avgRank - from first detection point', fontsize=18)
 			fig.tight_layout()
 			plt.savefig(f'plot-beta-{model}-realdet-skips.pdf')
 		elif realdet:
-			#ax.set_title('Beta-weighted avgRank - from first detection point', fontsize=18)
-			#fig.tight_layout(rect=[0, 0, 1, 1])
 			fig.tight_layout()
 			plt.savefig(f'plot-beta-{model}-realdet.pdf')
 		else:	
-			#ax.set_title('Beta-weighted avgRank - from attack start', fontsize=18)
-			#fig.tight_layout(rect=[0, 0, 1, 1])
 			fig.tight_layout()
 			plt.savefig(f'plot-beta-{model}-idealdet.pdf')
 
@@ -223,8 +216,6 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 					print(f'Attack {atk_name}: {label} instant detect, skip.')
 					continue
 
-				#print(f'For attack {atk_name}: {label}')
-
 				# Ranking based on no averages
 				rankings_no_avg = np.zeros((150, 4))
 				
@@ -246,7 +237,6 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 						if is_actuator(ds, sensor_cols[k]):
 							slice_weighted_avg[i,k] = slice[i,k,0] + BETA_SCALE * slice[i,k,1] + BETA_SCALE * slice[i,k,3]
 						else:
-							#slice_weighted_avg[i,k] = BETA_SCALE * slice[i,k,0] + slice[i,k,1] + slice[i,k,2]
 							slice_weighted_avg[i,k] = slice[i,k,0] + slice[i,k,1] + slice[i,k,3]
 
 					rankings_wavg_of_methods[i] = tep_utils.scores_to_rank(slice_weighted_avg[i], col_idx)
@@ -285,30 +275,23 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 		fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 		ax.plot(np.arange(150), np.mean(full_plot_obj_norm, axis=0)[:,0], color='black', label='MSE', lw=2)
 		ax.plot(np.arange(150), np.mean(full_plot_obj_norm, axis=0)[:,1], color='blue', label='SM', lw=2)
-		#ax.plot(np.arange(150), np.mean(full_plot_obj_norm, axis=0)[:,2], color='green', label='SHAP', lw=2)
 		ax.plot(np.arange(150), np.mean(full_plot_obj_norm, axis=0)[:,3], color='brown', label='LEMNA', lw=2)
 		ax.plot(np.arange(150), np.mean(full_avg_plot_obj_norm, axis=0), color='red', label='Avg', lw=2)
-		#ax.plot(np.arange(150), np.mean(full_wavg_plot_obj_norm, axis=0), color='orange', label=f'Avg (B = {BETA_SCALE})', lw=2)
 		ax.legend(ncol=2, fontsize=28)
 		ax.set_ylim([0, 0.5])
 		ax.set_ylabel('Normalized AvgRank', fontsize=32)
 		ax.tick_params(axis='both', which='major', labelsize=24)
 
 		if realdet and use_skips:
-			#ax.set_title(f'{model} AvgRank - Filtered', fontsize=24)
 			ax.set_xlabel('Time from detection point (seconds)', fontsize=32)
 			fig.tight_layout()
 			plt.savefig(f'plot-timing-{model}-realdet-skips.pdf')
 		elif realdet:
-			#ax.set_title(f'{model} practical timing', fontsize=32)
 			ax.set_xlabel('Time from detection point (seconds)', fontsize=32)
 			fig.tight_layout()
 			plt.savefig(f'plot-timing-{model}-realdet.pdf')
 		else:
-			#ax.set_title(f'{model} ideal timing', fontsize=32)
 			ax.set_xlabel('Time from attack start (seconds)', fontsize=32)
-			#ax.vlines(50, ymin=0, ymax=1, color='grey', linestyle='--')
-			#ax.text(52, 0.4, 'model input\nstarts at anomaly', fontsize=18)
 			fig.tight_layout()
 			plt.savefig(f'plot-timing-{model}-idealdet.pdf')
 

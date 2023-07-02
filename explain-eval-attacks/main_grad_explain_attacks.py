@@ -140,8 +140,8 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 			if count >= num_samples:
 				break
 
-		pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
-		print(f'Created explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl')
+		pickle.dump(gif_outputs, open(f'explanations-dir/explain23-detect-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+		print(f'Created explanations-dir/explain23-detect-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl')
 
 	else:
 		print(f'Attack {attack_idx} was missed')

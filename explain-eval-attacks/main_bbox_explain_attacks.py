@@ -121,7 +121,7 @@ def explain_detect(event_detector, lookup_name, attack_idx, attacks, Xtest, dete
 
 			full_scores[i] = exp_output
 
-		pickle.dump(full_scores, open(f'explanations-dir/explain23-pkl/explanations-{method}-{lookup_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+		pickle.dump(full_scores, open(f'explanations-dir/explain23-detect-pkl/explanations-{method}-{lookup_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
 	
 	else:
 

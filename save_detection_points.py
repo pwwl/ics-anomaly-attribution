@@ -111,39 +111,35 @@ def parse_arguments():
 		nargs='+')
 
 	lookup_names = []
-	for _, args in parser.parse_args()._get_kwargs():
-		if args is not None:
-			for arg in args:
-				vals = arg.split("-")
-				numArgs = len(vals)
-				
-				# if incorrect number of arguments
-				if numArgs != 6 and numArgs != 7:
-					raise SystemExit(f"ERROR: Provided incorrectly formatted argument {arg}")
-				
-				model_type, dataset, layers, history = vals[:4]
-				units = vals[-2]
-				if model_type not in model_choices:
-					raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
-				if dataset not in data_choices:
-					raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
-				if not units.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
-				if not history.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
-				if not layers.isnumeric():
-					raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
-				run_name = vals[-1]
-				# if model is CNN (has kernel argument)
-				if numArgs == 7:
-					kernel = vals[4]
-					if not kernel.isnumeric():
-						raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
-					name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-units{units}-{run_name}"
-				else:
-					name = f"{model_type}-{dataset}-l{layers}-hist{history}-units{units}-{run_name}"
-				
-				lookup_names.append((name, dataset))
+	for arg in parser.parse_args().md:
+		vals = arg.split("-")
+		numArgs = len(vals)
+		
+		# if incorrect number of arguments
+		if numArgs != 6 and numArgs != 7:
+			raise SystemExit(f"ERROR: Provided incorrectly formatted argument {arg}")
+		
+		model_type, dataset, layers, history = vals[:4]
+		units = vals[-2]
+
+		if model_type not in model_choices:
+			raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
+		if dataset not in data_choices:
+			raise SystemExit(f"ERROR: Provided invalid dataset name {dataset}")
+		if not units.startswith("units") or not units[len("units"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {units}")
+		if not history.startswith("hist") or not history[len("hist"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid history length {history}")
+		if not layers.startswith("l") or not layers[len("l"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of layers {layers}")
+		run_name = vals[-1]
+		# if model is CNN (has kernel argument)
+		if numArgs == 7:
+			kernel = vals[4]
+			if not kernel.startswith("kern") or not kernel[len("kern"):].isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid kernel size {kernel}")
+		
+		lookup_names.append((arg, dataset))
 	
 	return lookup_names
 				

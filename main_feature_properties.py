@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-import pdb
 import pickle
 
 import sys
@@ -104,8 +103,10 @@ def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 
 			if is_actuator(dataset, label):
 				sensor_types_list.append('Actuator')
+				val_types_list.append('bool')
 			else:
 				sensor_types_list.append('Sensor')
+				val_types_list.append('float')
 
 			detect_list.append(detect_idx)
 			labels_list.append(label)
@@ -133,8 +134,6 @@ def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 			'shap_ranking': first_scatter_obj[det_idx,2],
 			'lemna_ranking': first_scatter_obj[det_idx,3]
 		})
-
-		pdb.set_trace()
 
 		pickle.dump(df, open(f'meta-storage/realdet-{lookup_name}.pkl', 'wb'))
 
@@ -317,8 +316,6 @@ def make_detect_timing(lookup_tupls, attacks_to_consider):
 			'slice_tavg_ranking': scatter_obj[det_idx, 15],
 		})
 
-		pdb.set_trace()
-
 		pickle.dump(df, open(f'meta-storage/real-timing-{lookup_name}.pkl', 'wb'))
 		pickle.dump(full_slice_values, open(f'meta-storage/full-values-real-{lookup_name}.pkl', 'wb'))
 
@@ -401,7 +398,6 @@ def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 			multi_list.append(is_multi)
 			pattern_list.append(sd_obj[2])
 
-		print(first_scatter_obj)
 		print('------------------------')
 		print(f'Average first MSE ranking: {np.mean(first_scatter_obj[:,0])}')
 		print(f'Average first sm ranking: {np.mean(first_scatter_obj[:,1])}')
@@ -627,12 +623,12 @@ def parse_arguments():
 		nargs='+')
 	
 	parser.add_argument("--md", 
-		help="Format as model-dataset-layers-history-kernel-units-runname if model is CNN," +
-			 "format as model-dataset-layers-history-units-runname otherwise",
+		help="Format as {model}-{dataset}-l{layers}-hist{history}-kern{kernel}-units{units}-{runname} if model is CNN, " +
+			 "format as {model}-{dataset}-l{layers}-hist{history}-units{units}-{runname} otherwise. " +
+			 "As an example: CNN-SWAT-l2-hist50-kern3-units64-results",
 		nargs='+')
 
 	lookup_names = []
-	print(parser.parse_args().md)
 	for arg in parser.parse_args().md:
 		vals = arg.split("-")
 		numArgs = len(vals)
@@ -643,27 +639,25 @@ def parse_arguments():
 		
 		model_type, dataset, layers, history = vals[:4]
 		units = vals[-2]
+
 		if model_type not in model_choices:
 			raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
 		if dataset not in data_choices:
-			raise SystemExit(f"ERROR: Provided invalid dataset name {model_type}")
-		if not units.isnumeric():
-			raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {model_type}")
-		if not history.isnumeric():
-			raise SystemExit(f"ERROR: Provided invalid history length {model_type}")
-		if not layers.isnumeric():
-			raise SystemExit(f"ERROR: Provided invalid # of layers {model_type}")
+			raise SystemExit(f"ERROR: Provided invalid dataset name {dataset}")
+		if not units.startswith("units") or not units[len("units"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {units}")
+		if not history.startswith("hist") or not history[len("hist"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid history length {history}")
+		if not layers.startswith("l") or not layers[len("l"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of layers {layers}")
 		run_name = vals[-1]
 		# if model is CNN (has kernel argument)
 		if numArgs == 7:
 			kernel = vals[4]
-			if not kernel.isnumeric():
-				raise SystemExit(f"ERROR: Provided invalid kernel size {model_type}")
-			name = f"{model_type}-{dataset}-l{layers}-hist{history}-kern{kernel}-units{units}-{run_name}"
-		else:
-			name = f"{model_type}-{dataset}-l{layers}-hist{history}-units{units}-{run_name}"
+			if not kernel.startswith("kern") or not kernel[len("kern"):].isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid kernel size {kernel}")
 		
-		lookup_names.append((name, dataset, int(history)))
+		lookup_names.append((arg, dataset, int(history)))
 
 	return lookup_names, set(parser.parse_args().attack)
 

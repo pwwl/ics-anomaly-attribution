@@ -24,10 +24,6 @@ def load_stats_obj(header, model_type):
 		['LEMNA', 'lemna_ranking'],
 	]
 
-	# Note: AR for realdet throws error, since detection subsets are not the same
-	if header == 'idealdet':
-		methods.append(['AR', 'ar_rank'])
-
 	all_dfs = []
 
 	for dx in range(len(datasets)):
@@ -41,11 +37,6 @@ def load_stats_obj(header, model_type):
 			lookup_name = f'{model_type}-{dataset}-l2-hist50-units64-{run_name}'
 
 		df = pickle.load(open(f'meta-storage/model-detection-ranks/{header}-{lookup_name}.pkl', 'rb'))
-
-		# Load AR df
-		if header == 'idealdet':
-			ar_df = pickle.load(open(f'meta-storage/model-detection-ranks/{header}-AR-{dataset}.pkl', 'rb'))
-			df['ar_rank'] = ar_df['ar_rank']
 
 		# Add normalization to method rankings
 		for _, col_name in methods:

@@ -26,76 +26,6 @@ def slice_average(mse_scores, sm_scores, lemna_scores, dataset, sensor_cols):
 
 	return slice_scores
 
-def averaging_dfs():
-
-	datasets = ['SWAT', 'WADI', 'TEP']
-	models = ['CNN', 'GRU', 'LSTM']
-	
-	idealtime_df = []
-	ideal_df = []
-
-	realtime_df = []
-	real_df = []
-
-	slice_obj = []
-
-	for model in models:
-		
-		for ds in datasets:
-			
-			if model == 'CNN':
-				lookup = f'CNN-{ds}-l2-hist50-kern3-units64-results_ns1'
-			else:
-				lookup = f'{model}-{ds}-l2-hist50-units64-results_ns1'
-
-			dfi = pickle.load(open(f'meta-storage/model-detection-ranks/idealdet-{lookup}.pkl', 'rb'))
-			df_it = pickle.load(open(f'timing-{lookup}.pkl', 'rb'))
-			df_it['best_ranking'] = np.min(df_it[['mse_best_ranking', 'sm_best_ranking', 'shap_best_ranking', 'lemna_best_ranking']].values, axis=1)
-			df_it['dataset'] = ds
-
-			idealtime_df.append(df_it)
-			ideal_df.append(dfi)
-
-			# dfr = pickle.load(open(f'realdet-{lookup}.pkl', 'rb'))
-			# df_rt = pickle.load(open(f'real-timing-{lookup}.pkl', 'rb'))
-			# df_rt['best_ranking'] = np.min(df_rt[['mse_best_ranking', 'sm_best_ranking', 'lemna_best_ranking']].values, axis=1)
-			# df_rt['dataset'] = ds
-
-			# realtime_df.append(df_rt)
-			# real_df.append(dfr)
-
-		df1 = pd.concat(idealtime_df)
-		df2 = pd.concat(ideal_df)
-		# df3 = pd.concat(realtime_df)
-		# df4 = pd.concat(real_df)
-
-		print(f'---- IDEAL {model} {ds} -----')
-		print(f'Full averaging ranking: {np.mean(df1["slice_tavg_ranking"])}')
-		print(f'MSE averaging ranking: {np.mean(df1["mse_tavg_ranking"])}')
-		print(f'SM averaging ranking: {np.mean(df1["sm_tavg_ranking"])}')
-		print(f'SHAP averaging ranking: {np.mean(df1["shap_tavg_ranking"])}')
-		print(f'LEMNA averaging ranking: {np.mean(df1["lemna_tavg_ranking"])}')
-		
-		print(f'MSE ranking: {np.mean(df2["mse_ranking"])}')
-		print(f'SM ranking: {np.mean(df2["sm_ranking"])}')
-		print(f'SHAP ranking: {np.mean(df2["shap_ranking"])}')
-		print(f'LEMNA ranking: {np.mean(df2["lemna_ranking"])}')
-
-		# print('---- DETECTED -----')
-		# print(f'Full averaging ranking: {np.mean(df3["slice_tavg_ranking"])}')
-		# print(f'MSE averaging ranking: {np.mean(df3["mse_tavg_ranking"])}')
-		# print(f'SM averaging ranking: {np.mean(df3["sm_tavg_ranking"])}')
-		# print(f'LEMNA averaging ranking: {np.mean(df3["lemna_tavg_ranking"])}')
-		# print(f'MSE ranking: {np.mean(df4["mse_ranking"])}')
-		# print(f'SM ranking: {np.mean(df4["sm_ranking"])}')
-		# print(f'LEMNA ranking: {np.mean(df4["lemna_ranking"])}')
-		
-		# for ds in datasets:
-		# 	print(f"{ds} detected: {np.sum(df3['dataset'] == ds)}")
-		# 	print(f"{ds} instant detected: {np.sum((df3['detect_point'] < 5) & (df3['dataset'] == ds))}")
-
-	return df1, df2
-
 def make_beta_plot(realdet=False, use_skips=False):
 
 	models = ['CNN', 'GRU', 'LSTM']
@@ -233,7 +163,6 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 	models = ['CNN', 'GRU', 'LSTM']
 	datasets = ['SWAT', 'WADI', 'TEP']
 	ncols_arr = [51, 119, 53]
-	#dfi, dfr = averaging_dfs()
 	detection_points = pickle.load(open(f'meta-storage/detection-points.pkl', 'rb'))
 
 	for model in models:
@@ -333,74 +262,11 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 				full_avg_score += plot_attacked_feature_score
 				num_counted += 1
 
-				# fig, ax = plt.subplots(2, 1, figsize=(10, 12))
-				# ax[0].plot(np.arange(150), rankings_no_avg[:,0], color='black', label='MSE')
-				# ax[0].plot(np.arange(150), rankings_no_avg[:,1], color='blue', label='SM')
-				# ax[0].plot(np.arange(150), rankings_no_avg[:,2], color='brown', label='LEMNA')
-				# ax[0].plot(np.arange(150), rankings_avg_of_methods, color='red', label='Avg')
-				# ax[0].plot(np.arange(150), rankings_wavg_of_methods, color='orange', label=f'Avg (B = {BETA_SCALE})')
-				# ax[0].legend()
-				# ax[0].set_ylim([0, ncols])
-				# ax[0].set_ylabel('Attack feature ranking', fontsize=16)
-				
-				# ax[1].plot(np.arange(150), plot_attacked_feature_score[:,0], color='black', label='MSE')
-				# ax[1].plot(np.arange(150), plot_attacked_feature_score[:,1], color='blue', label='SM')
-				# ax[1].plot(np.arange(150), plot_attacked_feature_score[:,2], color='brown', label='LEMNA')
-
-				# ax[1].legend()
-				# ax[1].set_ylim([0, 1])
-				# ax[1].set_ylabel('Attack feature \n anomaly score', fontsize=16)
-				# fig.tight_layout()
-				# plt.savefig(f'temp-timing/timing-{ds}-{atk_name}-{label}.png')
-				# plt.close()
-
 			full_ranking_no_avg /= num_counted
 			full_meth_avg_ranking /= num_counted
 			full_meth_wavg_ranking /= num_counted
 			full_avg_score /= num_counted
 			print(f'Parsed {num_counted} attacks.')
-
-			###### Averaging by time
-
-			# fig, ax = plt.subplots(2, 1, figsize=(10, 12))
-			# ax[0].plot(np.arange(150), full_ranking_no_avg[:,0], color='black', label='MSE', lw=2)
-			# ax[0].plot(np.arange(150), full_ranking_no_avg[:,1], color='blue', label='SM', lw=2)
-			# ax[0].plot(np.arange(150), full_ranking_no_avg[:,2], color='brown', label='LEMNA', lw=2)
-			# ax[0].plot(np.arange(150), full_meth_avg_ranking, color='red', label='Avg', lw=2)
-			# ax[0].plot(np.arange(150), full_meth_wavg_ranking, color='orange', label=f'Avg (B = {BETA_SCALE})', lw=2)
-			# ax[0].legend(fontsize=14)
-			# ax[0].set_ylim([0, ncols])
-			# ax[0].set_ylabel('Time-averaged ranking', fontsize=16)
-			
-			# ax[1].plot(np.arange(150), full_avg_score[:,0], color='black', label='MSE', lw=2)
-			# ax[1].plot(np.arange(150), full_avg_score[:,1], color='blue', label='SM', lw=2)
-			# ax[1].plot(np.arange(150), full_avg_score[:,2], color='brown', label='LEMNA', lw=2)
-
-			# ax[1].legend(fontsize=14)
-			# ax[1].set_ylim([0, 1])
-			# ax[1].set_ylabel('Time-averaged anomaly score', fontsize=16)
-
-			# if realdet and use_skips:
-			# 	ax[0].set_title(f'{ds} AvgRank - Filtered', fontsize=18)
-			# 	ax[0].set_xlabel('Time from first detection point (seconds)', fontsize=16)
-			# 	fig.tight_layout()
-			# 	plt.savefig(f'plot-timing-{model}-{ds}-realdet-skips.pdf')
-			# elif realdet:
-			# 	ax[0].set_title(f'{ds} AvgRank', fontsize=18)
-			# 	ax[0].set_xlabel('Time from first detection point (seconds)', fontsize=16)
-			# 	fig.tight_layout()
-			# 	plt.savefig(f'plot-timing-{model}-{ds}-realdet.pdf')
-			# else:
-			# 	ax[0].vlines(50, ymin=0, ymax=1, color='grey', linestyle='--')
-			# 	ax[0].text(52, 0.85, 'timestep when\nΔt = history', fontsize=14)
-			# 	ax[0].set_title(f'{ds} AvgRank', fontsize=18)
-			# 	ax[0].set_xlabel('Time from attack start (seconds)', fontsize=16)
-			# 	fig.tight_layout()
-			# 	plt.savefig(f'plot-timing-{model}-{ds}-idealdet.pdf')
-
-			# plt.close()
-
-			#print(np.sum(full_ranking_no_avg))
 
 			full_plot_obj.append(full_ranking_no_avg)
 			full_avg_plot_obj.append(full_meth_avg_ranking)
@@ -451,11 +317,10 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 if __name__ == '__main__':
 	
 	make_timing_avg_plot()
-	#make_beta_plot()
+	make_beta_plot()
 	
 	make_timing_avg_plot(realdet=True)
-	#make_timing_avg_plot(realdet=True, use_skips=True)
-	#make_beta_plot(realdet=True)
-	#make_beta_plot(realdet=True, use_skips=True)
+	make_timing_avg_plot(realdet=True, use_skips=True)
+	make_beta_plot(realdet=True)
+	make_beta_plot(realdet=True, use_skips=True)
 
-	# averaging_dfs()

@@ -1,6 +1,6 @@
 """
 
-   Copyright 2022 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,40 +27,51 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import json
 
 # classes
-class MSEExplainer(object):
-    """ Live Explainer for ICS event detection models.
+class ICSExplainer(object):
+    """ Keras-based ML-Explainer for ICS event detection models.
 
         Attributes:
         params: dictionary with parameters defining the model structure,
     """
     def __init__(self, **kwargs):
-        """ Class constructor """
+        """ Class constructor, stores parameters and initialize AE Keras model. """
 
         # Default parameter values.
         params = {
             'verbose' : 0,
-            'method' : 'MSEExplainer'
+            'method' : 'Default'
             }
 
         for key, item in kwargs.items():
             params[key] = item
 
-        self.name = 'MSEExplainer'
+        self.name = 'Default'
         self.params = params
+        self.inner = None
 
-        # Supply the given event_detector
-        self.inner_detector = params['detector']
-
-    def score_generate(self, Xtest, index_selection=None, **explain_params):
-        """ Using MSE argmaxing, generate explanation scores for the given Xtest.
-
-            Xtest: input to explanation method.
-        """
+    def setup_explainer(self, model, Xtrain, output_feature):
+        """ Creates a wrapper around the given explanation method.
         
-        full_test_errors = self.inner_detector.reconstruction_errors(Xtest, batches=True)
-        relevant_test_errors = full_test_errors[index_selection]
+            Attributes:
+            model: Inner ML model to be explained
+            Xtrain: Training data for model.
+            output_feature: Target output value to explain. Assumes classification output.
+            sensor_cols: names of features (used for some outputs)
+        """
 
-        return relevant_test_errors
+        return NotImplementedError
+
+    def get_inner(self):
+        """ Return the inner model
+        """
+        return self.inner
+
+    def explain(self, Xexplain, **explain_params):
+        """ Return an explanation for Xexplain.
+
+            Xexplain: input to explanation method.
+        """
+        return NotImplementedError
 
     def get_name(self):
         """ Return explainer name

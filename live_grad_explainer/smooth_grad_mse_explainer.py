@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,12 +26,11 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 
 import json
 import tensorflow.keras.backend as K
-import tensorflow as tf
 
 from .explainer import ICSExplainer
 
 # classes
-class SmoothGradHistoryExplainer(ICSExplainer):
+class SmoothGradMseHistoryExplainer(ICSExplainer):
     """ Keras-based ML-Explainer for ICS event detection models.
 
         Attributes:
@@ -48,12 +47,12 @@ class SmoothGradHistoryExplainer(ICSExplainer):
         for key, item in kwargs.items():
             params[key] = item
 
-        self.name = 'smooth_gradients_history'
+        self.name = 'smooth_gradients_mse_history'
         self.params = params
         self.inner = None
         self.explainer = None
 
-    def setup_explainer(self, model, Ytrue, top_feat):
+    def setup_explainer(self, model, Ytrue):
         """ Creates a wrapper around the given explanation method.      
 
             Attributes:
@@ -65,10 +64,10 @@ class SmoothGradHistoryExplainer(ICSExplainer):
         self.inner = model
 
         # MSE of model output and reconstruction goal (last part of input)
-        top_loss = (self.inner.output[:, top_feat] - Ytrue[:, top_feat])**2
+        loss = K.mean((self.inner.output - Ytrue)**2)
         
         grads = K.gradients(
-          top_loss,
+          loss,
           self.inner.input
           )[0]
 
@@ -90,10 +89,6 @@ class SmoothGradHistoryExplainer(ICSExplainer):
         else:
           Xexplain_clean = Xexplain
 
-        # Find baseline, use 0s as default
-        if baselines is None:
-          baselines = 0 * Xexplain_clean
-
         smooth_grad = np.zeros_like(Xexplain_clean)
         sigma = np.sqrt(0.1 * (np.max(Xexplain_clean) - np.min(Xexplain_clean)))
 
@@ -109,7 +104,7 @@ class SmoothGradHistoryExplainer(ICSExplainer):
 
         return attributions
 
-class SaliencyMapHistoryExplainer(ICSExplainer):
+class SaliencyMapMseHistoryExplainer(ICSExplainer):
     """ Keras-based ML-Explainer for ICS event detection models.
 
         Attributes:
@@ -126,12 +121,12 @@ class SaliencyMapHistoryExplainer(ICSExplainer):
         for key, item in kwargs.items():
             params[key] = item
 
-        self.name = 'saliency_map_history'
+        self.name = 'saliency_map_mse_history'
         self.params = params
         self.inner = None
         self.explainer = None
 
-    def setup_explainer(self, model, Ytrue, top_feat):
+    def setup_explainer(self, model, Ytrue):
         """ Creates a wrapper around the given explanation method.      
 
             Attributes:
@@ -143,10 +138,10 @@ class SaliencyMapHistoryExplainer(ICSExplainer):
         self.inner = model
 
         # MSE of model output and reconstruction goal (last part of input)
-        top_loss = (self.inner.output[:, top_feat] - Ytrue[:, top_feat])**2
+        loss = K.mean((self.inner.output - Ytrue)**2)
         
         grads = K.gradients(
-          top_loss,
+          loss,
           self.inner.input
           )[0]
 

@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import tensorflow as tf
 
 from .explainer import ICSExplainer
 
-class ExpectedGradientsMseHistoryExplainer(ICSExplainer):
+class IntegratedGradientsHistoryExplainer(ICSExplainer):
     """ Keras-based ML-Explainer for ICS event detection models.
 
         Attributes:
@@ -47,12 +47,12 @@ class ExpectedGradientsMseHistoryExplainer(ICSExplainer):
         for key, item in kwargs.items():
             params[key] = item
 
-        self.name = 'expected_gradients_mse_history'
+        self.name = 'integrated_gradients_history'
         self.params = params
         self.inner = None
         self.explainer = None
 
-    def setup_explainer(self, model, Ytrue):
+    def setup_explainer(self, model, Ytrue, top_feat):
         """ Creates a wrapper around the given explanation method.      
 
             Attributes:
@@ -64,9 +64,10 @@ class ExpectedGradientsMseHistoryExplainer(ICSExplainer):
         self.inner = model
 
         # MSE of model output and reconstruction goal (last part of input)
-        loss = K.mean((self.inner.output - Ytrue)**2)
+        top_loss = (self.inner.output[:, top_feat] - Ytrue[:, top_feat])**2
+        
         grads = K.gradients(
-          loss,
+          top_loss,
           self.inner.input
           )[0]
 
@@ -75,12 +76,11 @@ class ExpectedGradientsMseHistoryExplainer(ICSExplainer):
 
         return 
 
-    def explain(self, Xexplain, baselines, n_steps = 200, **explain_params):
+    def explain(self, Xexplain, baselines=None, n_steps = 200, multiply_by_input=True, **explain_params):
         """ Return an explanation for Xexplain.
 
             Attributes:
             Xexplain: Target to explain. Can be an nxd example.
-            baselines: Set of (n x h x d) training inputs used to sample expectation from. This is mandatory for EG.
         """
 
         # If vector given, clean input into a 1xd
@@ -89,22 +89,21 @@ class ExpectedGradientsMseHistoryExplainer(ICSExplainer):
         else:
           Xexplain_clean = Xexplain
 
-        expected_grad = np.zeros_like(Xexplain_clean)
+        # Find baseline, use 0s as default
+        if baselines is None:
+          baselines = 0 * Xexplain_clean
 
-        # EG: Sample a training input, and a [0,1] interpolation value
+        integrated_grad = np.zeros_like(Xexplain_clean)
+
         for k in range(n_steps):
+          step_value = baselines + (k / n_steps) * (Xexplain_clean - baselines)
+          integrated_grad += self.explainer([step_value])[0]
 
-          # Sample input from given baselines
-          sample_idx = np.random.randint(len(baselines))
-          sample_baseline = baselines[sample_idx]
+        if multiply_by_input:
+          attributions = integrated_grad * (Xexplain_clean - baselines) * (1/n_steps)
+        else:
+          attributions = integrated_grad * (1/n_steps)
 
-          # Sample [0,1] value 
-          sample_interp = np.random.uniform()
-
-          step_value = sample_baseline + sample_interp * (Xexplain_clean - sample_baseline)
-          expected_grad += self.explainer([step_value])[0]
-
-        attributions = expected_grad * Xexplain_clean * (1/n_steps)
         return attributions
 
 if __name__ == "__main__":

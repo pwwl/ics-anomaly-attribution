@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import tensorflow as tf
 
 from .explainer import ICSExplainer
 
-class IntegratedGradientsHistoryExplainer(ICSExplainer):
+class IntegratedGradientsMseHistoryExplainer(ICSExplainer):
     """ Keras-based ML-Explainer for ICS event detection models.
 
         Attributes:
@@ -47,12 +47,12 @@ class IntegratedGradientsHistoryExplainer(ICSExplainer):
         for key, item in kwargs.items():
             params[key] = item
 
-        self.name = 'integrated_gradients_history'
+        self.name = 'integrated_gradients_mse_history'
         self.params = params
         self.inner = None
         self.explainer = None
 
-    def setup_explainer(self, model, Ytrue, top_feat):
+    def setup_explainer(self, model, Ytrue):
         """ Creates a wrapper around the given explanation method.      
 
             Attributes:
@@ -64,10 +64,10 @@ class IntegratedGradientsHistoryExplainer(ICSExplainer):
         self.inner = model
 
         # MSE of model output and reconstruction goal (last part of input)
-        top_loss = (self.inner.output[:, top_feat] - Ytrue[:, top_feat])**2
+        loss = K.mean((self.inner.output - Ytrue)**2)
         
         grads = K.gradients(
-          top_loss,
+          loss,
           self.inner.input
           )[0]
 

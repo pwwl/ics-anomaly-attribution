@@ -16,29 +16,27 @@
 
 """
 
-import lime
-import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import pdb
 import pickle
-import shap
 
 # Internal imports
 import os
 import sys
 sys.path.append('..')
 
-import tensorflow as tf
-tf.compat.v1.disable_v2_behavior()
+# Ignore ugly futurewarnings from np vs tf.
+import warnings
+warnings.filterwarnings('ignore',category=FutureWarning)
 
-from sklearn.model_selection import train_test_split
+import tensorflow as tf
 from data_loader import load_train_data, load_test_data
 from main_train import load_saved_model
 
-from live_explainer.score_generator import lime_score_generator, shap_score_generator, lemna_score_generator
+from live_bbox_explainer.score_generator import lime_score_generator, shap_score_generator, lemna_score_generator
 
-from tep_utils import idx_to_sen, load_tep_attack, get_footer_list
+from tep_utils import load_tep_attack, get_footer_list
 import utils
 
 np.set_printoptions(suppress=True)

@@ -16,12 +16,8 @@
 
 """
 
-from typing import Dict, List, Tuple
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
-import json
 import os
 import pickle
 import pdb
@@ -33,16 +29,14 @@ sys.path.append('..')
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning)
 
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 from data_loader import load_train_data, load_test_data
-from grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
-from grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
+from live_grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
+from live_grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
 from main_train import load_saved_model
 
-from tep_utils import load_tep_attack, attack_footer_to_sensor_idx, idx_to_sen, sen_to_idx
-from tep_utils import get_pid, get_non_pid, get_xmv, get_skip_list
+from tep_utils import load_tep_attack, get_skip_list
 
 import metrics
 import utils
@@ -200,7 +194,7 @@ if __name__ == "__main__":
 	print(f'Explaining top feature only?: {use_top_feat}')
 
 	run_name = args.run_name
-	config = {} # type: Dict[str, str]
+	config = {}
 	utils.update_config_model(args, config, model_type, dataset_name)
 
 	model_name = config['name']

@@ -90,6 +90,7 @@ def explain_true_position(event_detector, run_name, model_name, explainer, Xtest
 			break
 
 	pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
+	print(f'Created explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl')
 
 	return
 
@@ -140,6 +141,7 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 				break
 
 		pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+		print(f'Created explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl')
 
 	else:
 		print(f'Attack {attack_idx} was missed')
@@ -152,7 +154,7 @@ def parse_arguments():
 
 	parser.add_argument("attack",
 		help="Which attack to explore?",
-		type=str)
+		type=int)
 
 	# Explain specific
 	parser.add_argument("--explain_params_methods",
@@ -171,7 +173,7 @@ def parse_arguments():
 		help="Percentile threshold for selecting candidates for explanation. 0 (default) chooses optimal.")
 	
 	parser.add_argument("--num_samples",
-		default=150,
+		default=5,
 		type=int,
 		help="Number of samples")
 
@@ -185,7 +187,7 @@ if __name__ == "__main__":
 	args = parse_arguments()
 	model_type = args.model
 	dataset_name = args.dataset
-	attack_idx = int(args.attack)
+	attack_idx = args.attack
 
 	os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
@@ -283,13 +285,13 @@ if __name__ == "__main__":
 
 		if code == 'EG':
 			# Ideal detection
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_idx, use_top_feat=use_top_feat, num_samples=150)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_idx, use_top_feat=use_top_feat, num_samples=samples)
 
 			# Practical detection
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_idx, model_detection_points, use_top_feat=use_top_feat, num_samples=samples)
 		else:
 			# Ideal detection
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_idx, use_top_feat=use_top_feat, num_samples=150)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_idx, use_top_feat=use_top_feat, num_samples=samples)
 
 			# Practical detection
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, baseline, attack_idx, model_detection_points, use_top_feat=use_top_feat, num_samples=samples)

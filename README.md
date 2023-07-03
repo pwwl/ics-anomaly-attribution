@@ -115,11 +115,12 @@ Finally, rank the attribution methods for SWaT attack #1: the four attribution m
 python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-results
 ```
 
-MENTION HERE SOMETHING ABOUT HOW IF YOU WANTED YOU WOULD GENERATE PLOTS HERE IF YOU DID THIS FOR ALL MODEL AND DATASET COMBOS TO REPRODUCE THE PLOTS FOUND IN THE PAPER
+**Note: All core experiments in this work follow the same workflow. To fully reproduce our results and generate plots, experiments must be run on all models (CNN, GRU, LSTM), all attacks/manipulations in all datasets (SWAT, WADI, TEP), 
+and against all attribution methods (CF, SM, SG, IG, EG, LIME, SHAP, LEMNA).**
 
 ### Workflow 2 - CNN on TEP Dataset
 
-This workflow is similar to workflow 1 but is performed on the TEP dataset. 
+We provide another example that evaluates attribution methods on our synthetic manipulations: this workflow is similar to workflow 1 but is performed on the TEP dataset. 
 Because of differences in how features are internally represented between datasets, the workflow uses slightly modified scripts specifically for dealing with the TEP dataset. 
 This will also generate explanations on a singular TEP attack. Ensure you have retrieved the training dataset as mentioned [here](#using-the-datasets).
 The sample attack used for this workflow is provided in `tep-attacks/matlab/TEP_test_cons_p2s_s1.csv`, which is a constant, two-standard-deviation manipulation on the first TEP sensor.

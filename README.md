@@ -40,11 +40,13 @@
 
 ### Requirements
 
-This project uses Python3 and Tensorflow 1, which can be used with 64-bit Python 3.7.
+This project uses Python3 and Tensorflow 1, which requires 64-bit Python 3.7 (or lower).
 The best way to get set up is with a Python virtual environment (we recommend using conda). If you don't already have Anaconda3 installed, find your machine's installer [here](https://www.anaconda.com/download#downloads) and complete the installation process.
 We also recommend using a Linux machine to avoid problems with executing Bash scripts.
 
-CLEMENT: HARDWARE REQUIREMENTS? EX: MEMORY AND STORAGE?
+Our primarily development environment was a commodity desktop with 32 GB RAM, using Ubuntu 20.04.
+To store all packages, datasets, trained models, and output files, approximately 10 GB of storage is sufficient.
+If downloading and testing on the [full set of TEP manipulations](https://drive.google.com/file/d/1h9rYcuU6VLGS2vl5o5jDkrAz5HuSDe1F/view?usp=sharing), another 50 GB is required.
 
 ### Installation
 

@@ -25,8 +25,8 @@ import pickle
 
 import sys
 sys.path.append('explain-eval-manipulations')
-
-from utils.tep_utils import scores_to_rank
+import utils.tep_utils
+# from utils.tep_utils import scores_to_rank, get_footer_list, 
 
 np.set_printoptions(suppress=True)
 DEFAULT_CMAP = plt.get_cmap('Reds', 5)
@@ -36,9 +36,9 @@ SCALE = 1
 
 def real_detection_rankings(lookup_tupls):
 
-	attacks = tep_utils.get_footer_list(patterns=['cons'])
+	attacks = utils.tep_utils.get_footer_list(patterns=['cons'])
 
-	for lookup_name, history in lookup_tupls:
+	for lookup_name, _ in lookup_tupls:
 
 		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
@@ -61,7 +61,7 @@ def real_detection_rankings(lookup_tupls):
 			pattern = splits[0]
 			mag = splits[1]
 			label = splits[2]
-			col_idx = tep_utils.sen_to_idx(label)
+			col_idx = utils.tep_utils.sen_to_idx(label)
 			is_multi = 'solo'
 			sd = int(mag[1])
 			att_start = 10000
@@ -85,10 +85,10 @@ def real_detection_rankings(lookup_tupls):
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
 
-			first_ranking = scores_to_rank(first_mses, col_idx)
-			first_sm_ranking = scores_to_rank(first_sm, col_idx)
-			first_shap_ranking = scores_to_rank(first_shap, col_idx)
-			first_lemna_ranking = scores_to_rank(first_lemna, col_idx)
+			first_ranking = utils.tep_utils.scores_to_rank(first_mses, col_idx)
+			first_sm_ranking = utils.tep_utils.scores_to_rank(first_sm, col_idx)
+			first_shap_ranking = utils.tep_utils.scores_to_rank(first_shap, col_idx)
+			first_lemna_ranking = utils.tep_utils.scores_to_rank(first_lemna, col_idx)
 			
 			scatter_obj[foot_idx, 0] = sd
 
@@ -139,8 +139,7 @@ def real_detection_rankings(lookup_tupls):
 
 def ideal_detection_rankings(lookup_tupls):
 
-	attack_footers = tep_utils.get_footer_list(patterns=['cons'])
-	sensor_cols = tep_utils.get_short_colnames()
+	attack_footers = utils.tep_utils.get_footer_list(patterns=['cons'])
 
 	for lookup_name, history in lookup_tupls:
 
@@ -162,7 +161,7 @@ def ideal_detection_rankings(lookup_tupls):
 			mag = splits[1]
 			label = splits[2]
 					
-			col_idx = tep_utils.sen_to_idx(label)
+			col_idx = utils.tep_utils.sen_to_idx(label)
 			att_start = 10000 - history - 1
 			att_end = 14000 - history - 1
 
@@ -183,10 +182,10 @@ def ideal_detection_rankings(lookup_tupls):
 			first_shap = shap_scores[history]
 			first_lemna = lemna_scores[history]
 
-			first_ranking = scores_to_rank(first_mses, col_idx)
-			first_sm_ranking = scores_to_rank(first_sm, col_idx)
-			first_shap_ranking = scores_to_rank(first_shap, col_idx)
-			first_lemna_ranking = scores_to_rank(first_lemna, col_idx)
+			first_ranking = utils.tep_utils.scores_to_rank(first_mses, col_idx)
+			first_sm_ranking = utils.tep_utils.scores_to_rank(first_sm, col_idx)
+			first_shap_ranking = utils.tep_utils.scores_to_rank(first_shap, col_idx)
+			first_lemna_ranking = utils.tep_utils.scores_to_rank(first_lemna, col_idx)
 
 			first_scatter_obj[foot_idx, 0] = first_ranking
 			first_scatter_obj[foot_idx, 1] = first_sm_ranking
@@ -240,9 +239,9 @@ def ideal_detection_timing(lookup_tupls):
 		all_detection_points = pickle.load(open(f'meta-storage/{lookup_name}-all-detection-points.pkl', 'rb'))
 		model_all_detection_points = all_detection_points[lookup_name]
 
-		attack_footers = tep_utils.get_footer_list(patterns=['cons'])
+		attack_footers = utils.tep_utils.get_footer_list(patterns=['cons'])
 
-		sensor_cols = tep_utils.get_short_colnames()
+		sensor_cols = utils.tep_utils.get_short_colnames()
 		ncols = len(sensor_cols)
 
 		scatter_obj = np.zeros((len(attack_footers), 17))
@@ -266,7 +265,7 @@ def ideal_detection_timing(lookup_tupls):
 			mag = splits[1]
 			label = splits[2]
 					
-			col_idx = tep_utils.sen_to_idx(label)
+			col_idx = utils.tep_utils.sen_to_idx(label)
 			att_start = 10000 - history - 1
 			att_end = 14000 - history - 1
 
@@ -276,7 +275,7 @@ def ideal_detection_timing(lookup_tupls):
 			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-true150.pkl', 'rb')) 
 
 			smap_scores = np.sum(np.abs(smap_scores_full), axis=1)
-			shap_scores = np.sum(np.abs(smap_scores_full), axis=1)
+			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
 			mse_rankings = np.zeros(150)
@@ -300,10 +299,10 @@ def ideal_detection_timing(lookup_tupls):
 				shap_slice = shap_scores[i]
 				lemna_slice = lemna_scores[i]
 
-				mse_rankings[i] = scores_to_rank(mse_slice, col_idx)
-				sm_rankings[i] = scores_to_rank(sm_slice, col_idx)
-				shap_rankings[i] = scores_to_rank(shap_slice, col_idx)
-				lemna_rankings[i] = scores_to_rank(lemna_slice, col_idx)
+				mse_rankings[i] = utils.tep_utils.scores_to_rank(mse_slice, col_idx)
+				sm_rankings[i] = utils.tep_utils.scores_to_rank(sm_slice, col_idx)
+				shap_rankings[i] = utils.tep_utils.scores_to_rank(shap_slice, col_idx)
+				lemna_rankings[i] = utils.tep_utils.scores_to_rank(lemna_slice, col_idx)
 
 				mse_slice_norm = mse_slice / np.sum(mse_slice)
 				sm_slice_norm = sm_slice / np.sum(sm_slice)
@@ -316,7 +315,7 @@ def ideal_detection_timing(lookup_tupls):
 				full_slice_values[foot_idx, i, :, 3] = lemna_slice_norm
 
 				slice_avg = np.sum(np.vstack([mse_slice_norm, sm_slice_norm, lemna_slice_norm]), axis=0)
-				slice_avg_rankings[i] = scores_to_rank(slice_avg, col_idx)
+				slice_avg_rankings[i] = utils.tep_utils.scores_to_rank(slice_avg, col_idx)
 
 				mse_tavg += mse_slice_norm
 				sm_tavg += sm_slice_norm
@@ -324,11 +323,11 @@ def ideal_detection_timing(lookup_tupls):
 				lemna_tavg += lemna_slice_norm
 				slice_tavg += slice_avg
 
-			mse_avg_ranking = scores_to_rank(mse_tavg, col_idx)
-			sm_avg_ranking = scores_to_rank(sm_tavg, col_idx)
-			shap_avg_ranking = scores_to_rank(shap_tavg, col_idx)
-			lemna_avg_ranking = scores_to_rank(lemna_tavg, col_idx)
-			avg_avg_ranking = scores_to_rank(slice_tavg, col_idx)
+			mse_avg_ranking = utils.tep_utils.scores_to_rank(mse_tavg, col_idx)
+			sm_avg_ranking = utils.tep_utils.scores_to_rank(sm_tavg, col_idx)
+			shap_avg_ranking = utils.tep_utils.scores_to_rank(shap_tavg, col_idx)
+			lemna_avg_ranking = utils.tep_utils.scores_to_rank(lemna_tavg, col_idx)
+			avg_avg_ranking = utils.tep_utils.scores_to_rank(slice_tavg, col_idx)
 
 			##################################################################
 
@@ -422,8 +421,8 @@ def ideal_detection_timing(lookup_tupls):
 
 def real_detection_timing(lookup_tupls):
 
-	attacks = tep_utils.get_footer_list(patterns=['cons'])
-	sensor_cols = tep_utils.get_short_colnames()
+	attacks = utils.tep_utils.get_footer_list(patterns=['cons'])
+	sensor_cols = utils.tep_utils.get_short_colnames()
 	ncols = len(sensor_cols)
 
 	for lookup_name, history in lookup_tupls:
@@ -450,7 +449,7 @@ def real_detection_timing(lookup_tupls):
 			pattern = splits[0]
 			mag = splits[1]
 			label = splits[2]
-			col_idx = tep_utils.sen_to_idx(label)
+			col_idx = utils.tep_utils.sen_to_idx(label)
 			is_multi = 'solo'
 			sd = int(mag[1])
 			att_start = 10000
@@ -490,10 +489,10 @@ def real_detection_timing(lookup_tupls):
 				shap_slice = shap_scores[i]
 				lemna_slice = lemna_scores[i]
 
-				mse_rankings[i] = scores_to_rank(mse_slice, col_idx)
-				sm_rankings[i] = scores_to_rank(sm_slice, col_idx)
-				shap_rankings[i] = scores_to_rank(shap_slice, col_idx)
-				lemna_rankings[i] = scores_to_rank(lemna_slice, col_idx)
+				mse_rankings[i] = utils.tep_utils.scores_to_rank(mse_slice, col_idx)
+				sm_rankings[i] = utils.tep_utils.scores_to_rank(sm_slice, col_idx)
+				shap_rankings[i] = utils.tep_utils.scores_to_rank(shap_slice, col_idx)
+				lemna_rankings[i] = utils.tep_utils.scores_to_rank(lemna_slice, col_idx)
 
 				mse_slice_norm = mse_slice / np.sum(mse_slice)
 				sm_slice_norm = sm_slice / np.sum(sm_slice)
@@ -506,7 +505,7 @@ def real_detection_timing(lookup_tupls):
 				full_slice_values[foot_idx, i, :, 3] = lemna_slice_norm
 
 				slice_avg = np.sum(np.vstack([mse_slice_norm, sm_slice_norm, lemna_slice_norm]), axis=0)
-				slice_avg_rankings[i] = scores_to_rank(slice_avg, col_idx)
+				slice_avg_rankings[i] = utils.tep_utils.scores_to_rank(slice_avg, col_idx)
 
 				mse_tavg += mse_slice_norm
 				sm_tavg += sm_slice_norm
@@ -514,11 +513,11 @@ def real_detection_timing(lookup_tupls):
 				lemna_tavg += lemna_slice_norm
 				slice_tavg += slice_avg
 
-			mse_avg_ranking = scores_to_rank(mse_tavg, col_idx)
-			sm_avg_ranking = scores_to_rank(sm_tavg, col_idx)
-			shap_avg_ranking = scores_to_rank(shap_tavg, col_idx)
-			lemna_avg_ranking = scores_to_rank(lemna_tavg, col_idx)
-			avg_avg_ranking = scores_to_rank(slice_tavg, col_idx)
+			mse_avg_ranking = utils.tep_utils.scores_to_rank(mse_tavg, col_idx)
+			sm_avg_ranking = utils.tep_utils.scores_to_rank(sm_tavg, col_idx)
+			shap_avg_ranking = utils.tep_utils.scores_to_rank(shap_tavg, col_idx)
+			lemna_avg_ranking = utils.tep_utils.scores_to_rank(lemna_tavg, col_idx)
+			avg_avg_ranking = utils.tep_utils.scores_to_rank(slice_tavg, col_idx)
 			
 			scatter_obj[foot_idx, 0] = sd
 			scatter_obj[foot_idx, 1] = np.mean(mse_rankings)
@@ -590,7 +589,7 @@ def stealthy_ranks(lookup_tupls):
 
 	for lookup_name, history in lookup_tupls:
 
-		attacks = tep_utils.get_footer_list(patterns=['cons', 'csum', 'line'], mags=['p2s'], locations='pid')
+		attacks = utils.tep_utils.get_footer_list(patterns=['cons', 'csum', 'line'], mags=['p2s'], locations='pid')
 
 		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
@@ -611,7 +610,7 @@ def stealthy_ranks(lookup_tupls):
 			pattern = splits[0]
 			mag = splits[1]
 			label = splits[2]
-			col_idx = tep_utils.sen_to_idx(label)
+			col_idx = utils.tep_utils.sen_to_idx(label)
 			is_multi = 'solo'
 			sd = int(mag[1])
 			att_start = 10000
@@ -635,10 +634,10 @@ def stealthy_ranks(lookup_tupls):
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
 
-			first_ranking = scores_to_rank(first_mses, col_idx)
-			first_sm_ranking = scores_to_rank(first_sm, col_idx)
-			first_shap_ranking = scores_to_rank(first_shap, col_idx)
-			first_lemna_ranking = scores_to_rank(first_lemna, col_idx)
+			first_ranking = utils.tep_utils.scores_to_rank(first_mses, col_idx)
+			first_sm_ranking = utils.tep_utils.scores_to_rank(first_sm, col_idx)
+			first_shap_ranking = utils.tep_utils.scores_to_rank(first_shap, col_idx)
+			first_lemna_ranking = utils.tep_utils.scores_to_rank(first_lemna, col_idx)
 
 			first_scatter_obj[foot_idx, 0] = first_ranking
 			first_scatter_obj[foot_idx, 1] = first_sm_ranking

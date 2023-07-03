@@ -218,7 +218,7 @@ class GatedRecurrentUnit(ICSDetector):
         train_history = self.inner.fit(data_generator(Xfull, train_idxs, batch_size), **train_params)
         
         # Save losses to CSV
-        if self.params['verbose'] > 0:        
+        if self.params['verbose'] > 1:        
             loss_obj = np.vstack([train_history.history['loss'], train_history.history['val_loss']])
             np.savetxt(f'gru-train-history-{self.params["layers"]}l-{self.params["units"]}u.csv', loss_obj, delimiter=',', fmt='%.5f')
 

@@ -204,6 +204,6 @@ if __name__ == "__main__":
 		print(f'Mag {mag} MSE: avg rank {np.mean(mse_ranks)} avg prop {np.mean(mse_props)}')
 		print(f'Mag {mag} EXP: avg rank {np.mean(exp_ranks)} avg prop {np.mean(exp_props)}')
 
-		np.save(f'benchmark-{model_name}-{run_name}-{method}.npy', np.vstack([mse_ranks, mse_props, exp_ranks, exp_props]))
+		np.save(f'meta-storage/benchmark-{model_name}-{run_name}-{method}.npy', np.vstack([mse_ranks, mse_props, exp_ranks, exp_props]))
 
 	print("Finished!")

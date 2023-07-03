@@ -43,7 +43,7 @@ def plot_benchmark():
 			for ex in range(len(methods)):
 
 				method = methods[ex]
-				scores = np.load(f'meta-storage/model-benchmark/benchmark-{lookup_name}-{method}.npy')
+				scores = np.load(f'meta-storage/benchmark-{lookup_name}-{method}.npy')
 
 				# MSE rank vs EXP rank
 				plot_obj[mx, 0] = np.mean(scores[0])

@@ -6,12 +6,6 @@ import pdb
 import pickle
 from utils import metrics
 
-# FEATURE_SETS = [
-# 	['s6', 's7', 's8', 's9', 's21', 's23', 's24', 's25', 's26', 's27', 's28', 'a10'],
-# 	['s15', 's16', 's17', 's18', 's19', 'a8'],
-# 	['s11', 's12', 's13', 's14', 's22', 'a7'],
-# ]
-
 def get_short_colnames():
 
 	col_names = []

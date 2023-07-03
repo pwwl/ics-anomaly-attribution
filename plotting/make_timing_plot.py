@@ -11,7 +11,7 @@ sys.path.append('..')
 
 import data_loader
 from utils import tep_utils, attack_utils
-from attack_utils import get_attack_indices, get_attack_sds, is_actuator
+from utils.attack_utils import get_attack_indices, get_attack_sds, is_actuator
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 BETA_SCALE = 2.5
@@ -35,7 +35,6 @@ def make_beta_plot(realdet=False, use_skips=False):
 	datasets = ['SWAT', 'WADI', 'TEP']
 	betas = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4]
 	ncols_arr = [51, 119, 53]
-	detection_points = pickle.load(open(f'meta-storage/detection-points.pkl', 'rb'))
 
 	for model in models:
 
@@ -49,12 +48,13 @@ def make_beta_plot(realdet=False, use_skips=False):
 				lookup = f'{model}-{ds}-l2-hist50-units64-results_ns1'
 
 			print(f'For {model} {ds}')
+			detection_points = pickle.load(open(f'meta-storage/{lookup}-detection-points.pkl', 'rb'))
 			model_detection_points = detection_points[lookup]
 
 			if realdet:
-				full_slice = pickle.load(open(f'meta-storage/full-values-real-{lookup}.pkl', 'rb'))
+				full_slice = pickle.load(open(f'meta-storage/real-detection-timing-scores-{lookup}.pkl', 'rb'))
 			else:
-				full_slice = pickle.load(open(f'meta-storage/full-values-{lookup}.pkl', 'rb'))
+				full_slice = pickle.load(open(f'meta-storage/ideal-detection-timing-scores-{lookup}.pkl', 'rb'))
 			
 			if ds == 'TEP':
 				sensor_cols = tep_utils.get_short_colnames()
@@ -144,13 +144,13 @@ def make_beta_plot(realdet=False, use_skips=False):
 
 		if realdet and use_skips:
 			fig.tight_layout()
-			plt.savefig(f'plot-beta-{model}-realdet-skips.pdf')
+			plt.savefig(f'plot-beta-{model}-real-skips.pdf')
 		elif realdet:
 			fig.tight_layout()
-			plt.savefig(f'plot-beta-{model}-realdet.pdf')
+			plt.savefig(f'plot-beta-{model}-real.pdf')
 		else:	
 			fig.tight_layout()
-			plt.savefig(f'plot-beta-{model}-idealdet.pdf')
+			plt.savefig(f'plot-beta-{model}-ideal.pdf')
 
 		plt.close()
 
@@ -159,7 +159,6 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 	models = ['CNN', 'GRU', 'LSTM']
 	datasets = ['SWAT', 'WADI', 'TEP']
 	ncols_arr = [51, 119, 53]
-	detection_points = pickle.load(open(f'meta-storage/detection-points.pkl', 'rb'))
 
 	for model in models:
 
@@ -175,12 +174,13 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 				lookup = f'{model}-{ds}-l2-hist50-units64-results_ns1'
 
 			print(f'For {model} {ds}')
+			detection_points = pickle.load(open(f'meta-storage/{lookup}-detection-points.pkl', 'rb'))
 			model_detection_points = detection_points[lookup]
 
 			if realdet:
-				full_slice = pickle.load(open(f'meta-storage/full-values-real-{lookup}.pkl', 'rb'))
+				full_slice = pickle.load(open(f'meta-storage/real-detection-timing-scores-{lookup}.pkl', 'rb'))
 			else:
-				full_slice = pickle.load(open(f'meta-storage/full-values-{lookup}.pkl', 'rb'))
+				full_slice = pickle.load(open(f'meta-storage/ideal-detection-timing-scores-{lookup}.pkl', 'rb'))
 			
 			if ds == 'TEP':
 				sensor_cols = tep_utils.get_short_colnames()
@@ -288,15 +288,15 @@ def make_timing_avg_plot(realdet=False, use_skips=False):
 		if realdet and use_skips:
 			ax.set_xlabel('Time from detection point (seconds)', fontsize=32)
 			fig.tight_layout()
-			plt.savefig(f'plot-timing-{model}-realdet-skips.pdf')
+			plt.savefig(f'plot-timing-{model}-real-skips.pdf')
 		elif realdet:
 			ax.set_xlabel('Time from detection point (seconds)', fontsize=32)
 			fig.tight_layout()
-			plt.savefig(f'plot-timing-{model}-realdet.pdf')
+			plt.savefig(f'plot-timing-{model}-real.pdf')
 		else:
 			ax.set_xlabel('Time from attack start (seconds)', fontsize=32)
 			fig.tight_layout()
-			plt.savefig(f'plot-timing-{model}-idealdet.pdf')
+			plt.savefig(f'plot-timing-{model}-ideal.pdf')
 
 		plt.close()
 
@@ -309,4 +309,3 @@ if __name__ == '__main__':
 	make_timing_avg_plot(realdet=True, use_skips=True)
 	make_beta_plot(realdet=True)
 	make_beta_plot(realdet=True, use_skips=True)
-

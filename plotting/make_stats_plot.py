@@ -37,7 +37,7 @@ def load_stats_obj(header, model_type):
 		else:
 			lookup_name = f'{model_type}-{dataset}-l2-hist50-units64-{run_name}'
 
-		df = pickle.load(open(f'meta-storage/model-detection-ranks/{header}-{lookup_name}.pkl', 'rb'))
+		df = pickle.load(open(f'meta-storage/attribution-ranks/{header}-{lookup_name}.pkl', 'rb'))
 
 		# Add normalization to method rankings
 		for _, col_name in methods:
@@ -52,9 +52,9 @@ def load_stats_obj(header, model_type):
 def main(model_type, detection_type='real'):
 
 	if detection_type == 'ideal':
-		full_df, methods = load_stats_obj('idealdet', model_type)
+		full_df, methods = load_stats_obj('ideal-detection-ranks', model_type)
 	elif detection_type == 'real':
-		full_df, methods = load_stats_obj('realdet', model_type)
+		full_df, methods = load_stats_obj('real-detection-ranks', model_type)
 
 	for method, dep_var in methods: 
 

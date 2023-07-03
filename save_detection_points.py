@@ -17,8 +17,8 @@
 """
 # Generic python
 from typing import Dict, List
+import argparse
 import pickle
-import pdb
 import sys
 
 # Ignore ugly futurewarnings from np vs tf.
@@ -31,14 +31,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Custom local packages
-import attack_utils
-import tep_utils
+from utils import attack_utils, tep_utils
 
 def get_detection_points(lookup_name, dataset_name):
 
 	history = 50    
-	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-{dataset_name}-ns.npy')
-	test_errors = np.load(f'meta-storage/model-mses/mses-{lookup_name}-{dataset_name}-ns.npy')
+	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
+	test_errors = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
 	attacks, labels = attack_utils.get_attack_indices(dataset_name)
 
 	validation_instance_errors = np.mean(validation_errors, axis=1)
@@ -57,13 +56,6 @@ def get_detection_points(lookup_name, dataset_name):
 
 		attack_region = test_instance_errors[att_start:att_end]    
 
-		# fig, ax = plt.subplots(1, 1, figsize=(8, 5))
-		# ax.plot(attack_region)
-		# ax.hlines(cutoff, xmin=0, xmax=len(attack_region), colors='red', linestyles='dashed')
-		# ax.set_title(f'{dataset_name} attack {atk_idx}')
-		# plt.savefig(f'{lookup_name}-attack{atk_idx}.png')
-		# plt.close()
-
 		if np.sum(attack_region > cutoff) > 0:
 			det_point = np.min(np.where(attack_region > cutoff)[0])
 			detection_lookup[atk_idx] = det_point
@@ -71,15 +63,13 @@ def get_detection_points(lookup_name, dataset_name):
 			print(f'{lookup_name} detected atk {atk_idx} length {len(attack_idxs)} at point {det_point}')
 		else:
 			print(f'{lookup_name} missed atk {atk_idx}')
-
-		#pdb.set_trace()
 	
 	return detection_lookup, detection_full_lookup
 
-def get_tep_detection_points(lookup_name, dataset_name):
+def get_tep_detection_points(lookup_name):
 
 	history = 50    
-	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-{dataset_name}-ns.npy')
+	validation_errors = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 	validation_instance_errors = np.mean(validation_errors, axis=1)
 
 	footer_list1 = tep_utils.get_footer_list(patterns=['cons'])
@@ -109,35 +99,69 @@ def get_tep_detection_points(lookup_name, dataset_name):
 	
 	return detection_lookup, detection_full_lookup
 
+def parse_arguments():
+	
+	parser = argparse.ArgumentParser()
+	model_choices = set(['CNN', 'GRU', 'LSTM'])
+	data_choices = set(['SWAT', 'WADI', 'TEP'])
+	parser.add_argument("--md", 
+		help="Format as model-dataset-layers-history-kernel-units-runname if model is CNN," +
+			 "format as model-dataset-layers-history-units-runname otherwise",
+		nargs='+')
+
+	lookup_names = []
+	for arg in parser.parse_args().md:
+		vals = arg.split("-")
+		numArgs = len(vals)
+		
+		# if incorrect number of arguments
+		if numArgs != 6 and numArgs != 7:
+			raise SystemExit(f"ERROR: Provided incorrectly formatted argument {arg}")
+		
+		model_type, dataset, layers, history = vals[:4]
+		units = vals[-2]
+
+		if model_type not in model_choices:
+			raise SystemExit(f"ERROR: Provided invalid model type {model_type}")
+		if dataset not in data_choices:
+			raise SystemExit(f"ERROR: Provided invalid dataset name {dataset}")
+		if not units.startswith("units") or not units[len("units"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of units in hidden layers {units}")
+		if not history.startswith("hist") or not history[len("hist"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid history length {history}")
+		if not layers.startswith("l") or not layers[len("l"):].isnumeric():
+			raise SystemExit(f"ERROR: Provided invalid # of layers {layers}")
+		run_name = vals[-1]
+		# if model is CNN (has kernel argument)
+		if numArgs == 7:
+			kernel = vals[4]
+			if not kernel.startswith("kern") or not kernel[len("kern"):].isnumeric():
+				raise SystemExit(f"ERROR: Provided invalid kernel size {kernel}")
+		
+		lookup_names.append((arg, dataset))
+	
+	return lookup_names
+				
 
 if __name__ == "__main__":
 
-	datasets = ['SWAT', 'WADI', 'TEP']
-	models = ['CNN', 'GRU', 'LSTM']
-	run_name = 'results_ns1'
-	
+	lookup_tupls = parse_arguments()
+
 	model_detection_lookup = dict()
 	model_detection_full_lookup = dict()
-
-	for dataset_name in datasets:
-		for model_type in models:
-		
-			if model_type == 'CNN':
-				lookup_name = f'CNN-{dataset_name}-l2-hist50-kern3-units64-{run_name}'
-			else:
-				lookup_name = f'{model_type}-{dataset_name}-l2-hist50-units64-{run_name}'
-
-			if dataset_name == 'TEP':
-				detection_lookup, detection_full_lookup = get_tep_detection_points(lookup_name, dataset_name)
-			else:
-				detection_lookup, detection_full_lookup = get_detection_points(lookup_name, dataset_name)
+	
+	for lookup_tupl in lookup_tupls:
 			
-			model_detection_lookup[lookup_name] = detection_lookup
-			model_detection_full_lookup[lookup_name] = detection_full_lookup
+		if lookup_tupl[1] == 'TEP':
+			detection_lookup, detection_full_lookup = get_tep_detection_points(lookup_tupl[0])
+		else:
+			detection_lookup, detection_full_lookup = get_detection_points(lookup_tupl[0], lookup_tupl[1])
+		
+		model_detection_lookup[lookup_tupl[0]] = detection_lookup
+		model_detection_full_lookup[lookup_tupl[0]] = detection_full_lookup
 
-	pickle.dump(model_detection_lookup, open('meta-storage/detection-points.pkl' ,'wb'))
-	pickle.dump(model_detection_full_lookup, open('meta-storage/all-detection-points.pkl' ,'wb'))
-
-	pdb.set_trace()
-
-	print(f"Finished")
+	pickle.dump(model_detection_lookup, open(f'meta-storage/{lookup_tupl[0]}-detection-points.pkl' ,'wb'))
+	pickle.dump(model_detection_full_lookup, open(f'meta-storage/{lookup_tupl[0]}-all-detection-points.pkl' ,'wb'))
+	print(f"Saved meta-storage/{lookup_tupl[0]}-detection-points.pkl")
+	print(f"Saved meta-storage/{lookup_tupl[0]}-all-detection-points.pkl")
+	print(f"Finished!")

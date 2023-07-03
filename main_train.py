@@ -31,12 +31,6 @@ import json
 import pickle
 import time
 
-# Data science ML
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score
-
 # Ignore ugly futurewarnings from np vs tf.
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning)
@@ -45,12 +39,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, precision_recall_curve
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from tensorflow.keras.models import load_model
+import tensorflow as tf
+
+# Need to train model w/TF1 because SHAP incompatible with TF2 https://github.com/slundberg/shap/issues/85
+#tf.compat.v1.disable_v2_behavior()
+#tf.compat.v1.disable_eager_execution()
 
 # Custom packages
-from detector import lstm, cnn, gru, linear
+from detector import lstm, cnn, gru
 from data_loader import load_train_data, load_test_data
-
-import utils
+from utils import utils
 
 def train_forecast_model(model_type, config, Xtrain, Xval, Ytrain, Yval):
 
@@ -66,8 +64,6 @@ def train_forecast_model(model_type, config, Xtrain, Xval, Ytrain, Yval):
         event_detector = lstm.LongShortTermMemory(**model_params)
     elif model_type == 'CNN':
         event_detector = cnn.ConvNN(**model_params)
-    elif model_type == 'LIN':
-        event_detector = linear.Linear(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return
@@ -92,14 +88,8 @@ def train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs
         event_detector = gru.GatedRecurrentUnit(**model_params)
     elif model_type == 'LSTM':
         event_detector = lstm.LongShortTermMemory(**model_params)
-    elif model_type == 'DNN':
-        event_detector = dnn.DeepNN(**model_params)
     elif model_type == 'CNN':
         event_detector = cnn.ConvNN(**model_params)
-    elif model_type == 'LIN':
-        event_detector = linear.Linear(**model_params)
-    elif model_type == 'ID':
-        event_detector = identity.Identity(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return
@@ -114,7 +104,12 @@ def train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs
 
 def save_model(event_detector, config, run_name='results'):
     model_name = config['name']
-    event_detector.save(f'models/{run_name}/{model_name}')
+    try:
+        event_detector.save(f'models/{run_name}/{model_name}')
+    except FileNotFoundError:
+        event_detector.save(f'models/results/{model_name}')
+        print(f"Directory models/{run_name}/ not found, model {model_name} saved at models/results/ instead")
+        print(f"Note: we recommend creating models/{run_name}/ to store this model")
 
 # functions
 def load_saved_model(model_type, params_filename, model_filename):
@@ -130,8 +125,6 @@ def load_saved_model(model_type, params_filename, model_filename):
         event_detector = lstm.LongShortTermMemory(**model_params)
     elif model_type == 'GRU':
         event_detector = gru.GatedRecurrentUnit(**model_params)
-    elif model_type == 'LIN':
-        event_detector = linear.Linear(**model_params)
     else:
         print(f'Model type {model_type} is not supported.')
         return None
@@ -179,56 +172,24 @@ if __name__ == "__main__":
     }
 
     config = {
-        'grid_search': {
-            'percentile': args.detect_params_percentile,
-            'window': args.detect_params_windows,
-            'metrics': args.detect_params_metrics,
-            'pr-plot': False,
-            'detection-plots': args.detect_params_plots,
-            'save-metric-info': args.detect_params_save_npy
-        }
     }
 
     run_name = args.run_name
-    test_split = args.detect_params_test_split
     utils.update_config_model(args, config, model_type, dataset_name)
     model_name = config['name']
 
     Xfull, sensor_cols = load_train_data(dataset_name)
     Xtest, Ytest, _ = load_test_data(dataset_name)
 
-    shuffle = True
-    by_idx = True
-
     history = config['model']['history']
 
-    if by_idx:
-        
-        train_idxs, val_idxs = utils.train_val_history_idx_split(dataset_name, Xfull, history)
+    train_idxs, val_idxs = utils.train_val_history_idx_split(dataset_name, Xfull, history)
 
-        train_params['steps_per_epoch'] = len(train_idxs) // train_params['batch_size']
-        train_params['validation_steps'] = len(val_idxs) // train_params['batch_size']
-        config.update({'train': train_params})
-        
-        event_detector = train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs)
-
-    else:
-
-        if shuffle:
-            # Preprocess the data history
-            Xfull_window, Yfull = utils.transform_to_window_data(Xfull, Xfull, history)
-            Xtrain, Xval, Ytrain, Yval = train_test_split(Xfull_window, Yfull, test_size=0.2, random_state=42, shuffle=True)
-        else:
-            Xtrain_flat, Xval_flat, _, _ = train_test_split(Xfull, Xfull, test_size=0.2, random_state=42, shuffle=False)
-            Xtrain, Ytrain = utils.transform_to_window_data(Xtrain_flat, Xtrain_flat, history)
-            Xval, Yval = utils.transform_to_window_data(Xval_flat, Xval_flat, history)
-
-        train_params['steps_per_epoch'] = len(Xtrain) // train_params['batch_size']
-        train_params['validation_steps'] = len(Xval) // train_params['batch_size']
-        config.update({'train': train_params})
-
-        # Trains and returns the inner event detection model
-        event_detector = train_forecast_model(model_type, config, Xtrain, Xval, Ytrain, Yval)
+    train_params['steps_per_epoch'] = len(train_idxs) // train_params['batch_size']
+    train_params['validation_steps'] = len(val_idxs) // train_params['batch_size']
+    config.update({'train': train_params})
+    
+    event_detector = train_forecast_model_by_idxs(model_type, config, Xfull, train_idxs, val_idxs)
 
     save_model(event_detector, config, run_name=run_name)
 

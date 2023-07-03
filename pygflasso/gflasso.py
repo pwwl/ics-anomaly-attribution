@@ -1,3 +1,7 @@
+"""
+    LEMNA implementation imported from original authors: https://github.com/yuyay/pygflasso
+"""
+
 import numpy as np 
 from sklearn.base import RegressorMixin, BaseEstimator
 

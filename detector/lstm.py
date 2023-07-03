@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ class LongShortTermMemory(ICSDetector):
         train_history = self.inner.fit(data_generator(Xtrain, Ytrain, batch_size), **train_params)
         
         # Save losses to CSV
-        if self.params['verbose'] > 0:        
+        if self.params['verbose'] > 1:        
             loss_obj = np.vstack([train_history.history['loss'], train_history.history['val_loss']])
             np.savetxt(f'lstm-train-history-{self.params["layers"]}l-{self.params["units"]}u.csv', loss_obj, delimiter=',', fmt='%.5f')
 
@@ -254,14 +254,6 @@ class LongShortTermMemory(ICSDetector):
         if window > 1:
 
             detection = np.convolve(detection, np.ones(window), 'same') // window
-
-            # clement: Removing this behavior
-            # Backfill the windows (e.g. if idx 255 is 1, all of 255-window:255 should be filled)
-            # fill_idxs = np.where(detection)
-            # fill_detection = detection.copy()
-            # for idx in fill_idxs[0]:
-            #     fill_detection[idx - window : idx] = 1
-            # return fill_detection
 
         return detection
 

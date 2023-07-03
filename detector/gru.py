@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -218,7 +218,7 @@ class GatedRecurrentUnit(ICSDetector):
         train_history = self.inner.fit(data_generator(Xfull, train_idxs, batch_size), **train_params)
         
         # Save losses to CSV
-        if self.params['verbose'] > 0:        
+        if self.params['verbose'] > 1:        
             loss_obj = np.vstack([train_history.history['loss'], train_history.history['val_loss']])
             np.savetxt(f'gru-train-history-{self.params["layers"]}l-{self.params["units"]}u.csv', loss_obj, delimiter=',', fmt='%.5f')
 

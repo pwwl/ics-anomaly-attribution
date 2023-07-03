@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -112,57 +112,6 @@ class ICSDetector(object):
         """ Return the inner model
         """
         return self.inner
-
-    # EXPERIMENTAL
-    def create_secondary_cnn(self, train_window_len, width, kernel_size):
-        
-        ce_input = Input(shape=(train_window_len, width), name='error_window_input')
-        ce_inter = Conv1D(filters=64, kernel_size=kernel_size, kernel_regularizer='l2')(ce_input)
-        ce_inter = BatchNormalization()(ce_inter)
-        ce_inter = Conv1D(filters=64, kernel_size=kernel_size, kernel_regularizer='l2')(ce_inter)
-        ce_inter = BatchNormalization()(ce_inter)
-        ce_inter = Conv1D(filters=64, kernel_size=kernel_size, kernel_regularizer='l2')(ce_inter)
-        ce_inter = Flatten()(ce_inter)
-        ce_inter = Dense(64, activation='relu', kernel_regularizer='l2')(ce_inter)
-        outputs = Dense(1, activation='sigmoid')(ce_inter)
-
-        sec_cnn = Model(inputs=[ce_input], outputs=outputs)
-        sec_cnn.compile(optimizer='adam', loss='binary_crossentropy',
-                        metrics=['accuracy'])
-        return sec_cnn
-
-    def create_secondary_dnn(self, width):
-        
-        sec_dnn = Sequential()
-        
-        sec_dnn.add(Dense(128, activation='relu', kernel_regularizer='l2', input_shape=(width,)))
-        sec_dnn.add(BatchNormalization())
-        sec_dnn.add(Dense(128, activation='relu', kernel_regularizer='l2'))
-        sec_dnn.add(BatchNormalization())
-        sec_dnn.add(Dense(64, activation='relu', kernel_regularizer='l2'))
-        sec_dnn.add(BatchNormalization())
-        sec_dnn.add(Dense(1, activation='sigmoid'))
-        
-        optim = Adam(amsgrad=True)   # avoid vanishing gradient causing spikes in loss
-        sec_dnn.compile(optimizer=optim, loss='binary_crossentropy', metrics=['accuracy'])
-
-        return sec_dnn
-
-    def create_secondary_lstm(self, train_window_len, width):
-        
-        ce_input = Input(shape=(train_window_len, width), name='error_window_input')
-        
-        ce_inter = LSTM(128, activation='tanh', dropout=0.2, kernel_regularizer='l2', return_sequences=True)(ce_input)
-        ce_inter = LSTM(128, activation='tanh', dropout=0.2, kernel_regularizer='l2', return_sequences=True)(ce_inter)
-        ce_inter = Flatten()(ce_inter)
-        ce_inter = Dense(64, activation='relu', kernel_regularizer='l2')(ce_inter)
-        outputs = Dense(1, activation='sigmoid')(ce_inter)
-
-        sec_lstm = Model(inputs=[ce_input], outputs=outputs)
-        sec_lstm.compile(optimizer='adam', loss='binary_crossentropy',
-                        metrics=['accuracy'])
-        
-        return sec_lstm
 
     def save_detection_params(self, best_theta, best_window):
 

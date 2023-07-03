@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
-import json
+import numpy as np
 import os
 import pickle
 import pdb
@@ -28,20 +25,16 @@ import sys
 
 # Ignore ugly futurewarnings from np vs tf.
 import warnings
-#warnings.filterwarnings('ignore',category=FutureWarning)
-warnings.filterwarnings("ignore")
+warnings.filterwarnings('ignore',category=FutureWarning)
 
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 sys.path.append('..')
 from data_loader import load_train_data, load_test_data
-from grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
-from grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
-import attack_utils
+from live_grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
+from live_grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
 from main_train import load_saved_model
-
-import utils
+from utils import attack_utils, utils
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -89,7 +82,8 @@ def explain_true_position(event_detector, run_name, model_name, explainer, Xtest
 		if count >= num_samples:
 			break
 
-	pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
+	pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl', 'wb'))
+	print(f'Created explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-true{num_samples}.pkl')
 
 	return
 
@@ -139,7 +133,8 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 			if count >= num_samples:
 				break
 
-		pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+		pickle.dump(gif_outputs, open(f'explanations-dir/explain23-detect-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl', 'wb'))
+		print(f'Created explanations-dir/explain23-detect-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_idx}-detect{num_samples}.pkl')
 
 	else:
 		print(f'Attack {attack_idx} was missed')
@@ -152,11 +147,11 @@ def parse_arguments():
 
 	parser.add_argument("attack",
 		help="Which attack to explore?",
-		type=str)
+		type=int)
 
 	# Explain specific
 	parser.add_argument("--explain_params_methods",
-		default=['SM', 'SG'],
+		default=['SM'],
 		nargs='+',
 		type=str,
 		help="Which explanation methods to use? Options: [SM, SG, IG, EG]")
@@ -165,10 +160,10 @@ def parse_arguments():
 		action='store_true',
 		help="Explain based off top MSE feature, rather than entire MSE")
 
-	parser.add_argument("--explain_params_threshold",
-		default=0,
-		type=float,
-		help="Percentile threshold for selecting candidates for explanation. 0 (default) chooses optimal.")
+	parser.add_argument("--num_samples",
+		default=5,
+		type=int,
+		help="Number of samples")
 
 	return parser.parse_args()
 
@@ -180,7 +175,7 @@ if __name__ == "__main__":
 	args = parse_arguments()
 	model_type = args.model
 	dataset_name = args.dataset
-	attack_idx = int(args.attack)
+	attack_idx = args.attack
 
 	os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
@@ -266,9 +261,9 @@ if __name__ == "__main__":
 		eg_baseline = None
 
 	lookup_name = f'{model_name}-{run_name}'
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
-	samples = 150
+	samples = args.num_samples
 
 	# Each explanation method in outer loop
 	for code, expl in explainers:
@@ -278,13 +273,13 @@ if __name__ == "__main__":
 
 		if code == 'EG':
 			# Ideal detection
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_idx, use_top_feat=use_top_feat, num_samples=150)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_idx, use_top_feat=use_top_feat, num_samples=samples)
 
 			# Practical detection
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_idx, model_detection_points, use_top_feat=use_top_feat, num_samples=samples)
 		else:
 			# Ideal detection
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_idx, use_top_feat=use_top_feat, num_samples=150)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_idx, use_top_feat=use_top_feat, num_samples=samples)
 
 			# Practical detection
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, baseline, attack_idx, model_detection_points, use_top_feat=use_top_feat, num_samples=samples)

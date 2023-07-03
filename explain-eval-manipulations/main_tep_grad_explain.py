@@ -1,6 +1,6 @@
 """
 
-   Copyright 2020 Lujo Bauer, Clement Fung
+   Copyright 2023 Lujo Bauer, Clement Fung
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,12 +16,8 @@
 
 """
 
-from typing import Dict, List, Tuple
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
-import json
 import os
 import pickle
 import pdb
@@ -33,19 +29,15 @@ sys.path.append('..')
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning)
 
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 from data_loader import load_train_data, load_test_data
-from grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
-from grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
+from live_grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
+from live_grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
 from main_train import load_saved_model
 
-from tep_utils import load_tep_attack, attack_footer_to_sensor_idx, idx_to_sen, sen_to_idx
-from tep_utils import get_pid, get_non_pid, get_xmv, get_skip_list
-
-import metrics
-import utils
+from utils import utils
+from utils.tep_utils import load_tep_attack, get_skip_list
 
 att_skip_list = get_skip_list()
 
@@ -61,7 +53,7 @@ def explain_true_position(event_detector, run_name, model_name, explainer, Xtest
 
 	for i in range(num_samples):
 
-		# Go at least 1 history deep in the history
+		# Go at least 1 history deep
 		att_start = attack_start + i - history - 1
 		att_end = attack_start + i + 1
 
@@ -92,7 +84,8 @@ def explain_true_position(event_detector, run_name, model_name, explainer, Xtest
 		if count >= num_samples:
 			break
 
-	pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{footer}-true{num_samples}.pkl', 'wb'))
+	pickle.dump(gif_outputs, open(f'explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{footer}-true{num_samples}.pkl', 'wb'))
+	print(f'Created explanations-dir/explain23-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{footer}-true{num_samples}.pkl')
 
 	return
 
@@ -141,7 +134,8 @@ def explain_detect(event_detector, run_name, model_name, explainer, Xtest, basel
 			if count >= num_samples:
 				break
 
-		pickle.dump(gif_outputs, open(f'explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_footer}-detect{num_samples}.pkl', 'wb'))
+		pickle.dump(gif_outputs, open(f'explanations-dir/explain23-detect-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_footer}-detect{num_samples}.pkl', 'wb'))
+		print(f'Created explanations-dir/explain23-detect-pkl/explanations-{explainer.get_name()}-{model_name}-{run_name}-{attack_footer}-detect{num_samples}.pkl')
 
 	else:
 		print(f'Attack {attack_footer} was missed')
@@ -158,7 +152,7 @@ def parse_arguments():
 
 	# Explain specific
 	parser.add_argument("--explain_params_methods",
-		default=['SM', 'SG'],
+		default=['SM'],
 		nargs='+',
 		type=str,
 		help="Which explanation methods to use? Options: [SM, SG, IG, EG]")
@@ -167,10 +161,10 @@ def parse_arguments():
 		action='store_true',
 		help="Explain based off top MSE feature, rather than entire MSE")
 
-	parser.add_argument("--explain_params_threshold",
-		default=0,
-		type=float,
-		help="Percentile threshold for selecting candidates for explanation. 0 (default) chooses optimal.")
+	parser.add_argument("--num_samples",
+		default=5,
+		type=int,
+		help="Number of samples")
 
 	return parser.parse_args()
 
@@ -193,7 +187,7 @@ if __name__ == "__main__":
 	print(f'Explaining top feature only?: {use_top_feat}')
 
 	run_name = args.run_name
-	config = {} # type: Dict[str, str]
+	config = {}
 	utils.update_config_model(args, config, model_type, dataset_name)
 
 	model_name = config['name']
@@ -269,10 +263,10 @@ if __name__ == "__main__":
 		eg_baseline = None
 
 	lookup_name = f'{model_name}-{run_name}'
-	detection_points = pickle.load(open('ccs-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	Xtest, Ytest, sensor_cols = load_tep_attack(dataset_name, attack_footer)
-	num_samples = 150
+	num_samples = args.num_samples
 
 	# Each explanation method in outer loop
 	for code, expl in explainers:
@@ -281,10 +275,10 @@ if __name__ == "__main__":
 		print('======================')
 
 		if code == 'EG':
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_footer, num_samples=5)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_footer, num_samples=num_samples)
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, eg_baseline, attack_footer, model_detection_points, num_samples=num_samples)
 		else:
-			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_footer, num_samples=5)
+			explain_true_position(event_detector, run_name, model_name, expl, Xtest, baseline, attack_footer, num_samples=num_samples)
 			explain_detect(event_detector, run_name, model_name, expl, Xtest, baseline, attack_footer, model_detection_points, num_samples=num_samples)
 
 	print("Finished!")

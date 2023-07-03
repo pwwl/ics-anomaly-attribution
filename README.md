@@ -14,30 +14,141 @@
    limitations under the License.
 -->
 
-# Framework for Training and Evaluating ML-based ICS Anomaly Detectors 
+# Attributions for ML-based ICS Anomaly Detection
 
 ## Table of Contents
 
-First time here?
-- [Overview of the Repository](#overview-of-the-repository)
+### Core Experiment Workflow
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Workflow 1 - CNN on SWaT Dataset](#workflow-1---cnn-on-swat-dataset)
-- [Workflow 2 - CNN on TEP Dataset](#workflow-1---cnn-on-tep-dataset)
+- [Workflow 2 - CNN on TEP Dataset](#workflow-2---cnn-on-tep-dataset)
 
-Reference Information
+### Reference information
+- [Overview of the Repository](#overview-of-the-repository)
 - [Dataset Descriptions](#datasets)
     - [Using the Datasets](#using-the-datasets)
 - [Model Descriptions](#models)
 - [Parameters](#parameters)
 
-Usage
-
+### Usage
 - [Execution](#execution)
 - [Training](#training)
 - [Explanations](#explanations)
 
-## Overview of the Repository
+## Core Experiment Workflow
+
+### Requirements
+
+This project uses Python3 and Tensorflow 1, which can be used with 64-bit Python 3.7.
+The best way to get set up is with a Python virtual environment (we recommend using conda). If you don't already have Anaconda3 installed, find your machine's installer [here](https://www.anaconda.com/download#downloads) and complete the installation process.
+We also recommend using a Linux machine to avoid problems with executing Bash scripts.
+
+CLEMENT: HARDWARE REQUIREMENTS? EX: MEMORY AND STORAGE?
+
+### Installation
+
+If you are on a Windows machine, we recommend using the Anaconda Prompt that came with the Anaconda3 installation. Otherwise, simply use the terminal.
+Ensure that conda is up to date with:
+```sh
+conda update conda --all
+```
+Create a Python 3.7 virtual environment called venv and activate it:
+```sh
+conda create --name venv python==3.7
+conda activate venv
+```
+Clone this repository with:
+```sh
+git clone -b steph-main-workflow https://github.com/pwwl/ics-anomaly-attribution.git
+```
+Navigate into the repository and install the requirements for this project:
+```sh
+cd ics-anomaly-attribution
+pip install -r requirements.txt
+```
+
+### Workflow 1 - CNN on SWaT Dataset
+
+This workflow will walk you through training a CNN model on the SWaT dataset, as well as generating explanations on a singular attack. Ensure you have retrieved the dataset as mentioned [here](#using-the-datasets).
+
+First, create the needed directories that will be populated with metadata:
+```sh
+bash make_dirs.sh
+```
+
+Train the CNN model on the SWaT dataset:
+```sh
+python main_train.py CNN SWAT --train_params_epochs 10
+```
+This will utilize a default configuration of two layers, a history length of 50, a kernel size of 3, and 64 units per layer for the CNN model. See detailed explanations for main_train.py [here](#model-parameters).
+
+Now generate model MSES: CLEMENT BETTER DESCRIPTION HERE
+```sh
+python save_model_mses.py CNN SWAT
+```
+
+Save detection points: CLEMENT BETTER DESCRIPTION HERE
+```sh
+python save_detection_points.py --md CNN-SWAT-l2-hist50-kern3-units64-results
+```
+
+Explain eval attacks from the `explain-eval-attacks` directory: CLEMENT BETTER DESCRIPTION HERE
+```sh
+cd explain-eval-attacks
+bash expl-full-bbox.sh
+bash expl-full-swat.sh
+```
+Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
+Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
+
+Generate rankings: CLEMENT BETTER DESCRIPTION HERE
+```sh
+python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-results
+```
+
+MENTION HERE SOMETHING ABOUT HOW IF YOU WANTED YOU WOULD GENERATE PLOTS HERE IF YOU DID THIS FOR ALL MODEL AND DATASET COMBOS TO REPRODUCE THE PLOTS FOUND IN THE PAPER
+
+### Workflow 2 - CNN on TEP Dataset
+
+This workflow is similar to workflow 1 but is performed on the TEP dataset. Because of CLEMENT BRIEFLY MENTION HERE THE DIFFERENCE WITH TEP THAT REQUIRES DIFFERENT HANDLING, the workflow is similar but utilizes modified scripts specifically for dealing with the TEP dataset. This will also generate explanations on a singular TEP attack. Ensure you have retrieved the dataset as mentioned [here](#using-the-datasets).
+
+First, create the needed directories that will be populated with metadata:
+```sh
+bash make_dirs.sh
+```
+
+Train the CNN model on the TEP dataset:
+```sh
+python main_train.py CNN TEP --train_params_epochs 10
+```
+
+Now generate model MSES: CLEMENT BETTER DESCRIPTION HERE
+```sh
+python save_model_mses.py CNN TEP
+```
+
+Save detection points: CLEMENT BETTER DESCRIPTION HERE
+```sh
+python save_detection_points.py --md CNN-TEP-l2-hist50-kern3-units64-results
+```
+
+Explain eval attacks from the `explain-eval-manipulations` directory: CLEMENT BETTER DESCRIPTION HERE
+```sh
+cd explain-eval-manipulations
+bash expl-full-bbox.sh
+bash expl-full-tep.sh
+```
+Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
+Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
+
+Generate rankings: CLEMENT BETTER DESCRIPTION HERE
+```sh
+python main_feature_properties_tep.py 1 --md CNN-TEP-l2-hist50-kern3-units64-results
+```
+## Reference Information
+
+### Overview of the Repository
 
 - [detector](#): 
     - `cnn.py`:
@@ -93,15 +204,8 @@ Usage
     - `data_loader.py`:
     - `main_benchmark.py`: 
 
-## Requirements
 
-This project uses Python3 and Tensorflow 1, which can be used with 64-bit Python 3.7.
-The best way to get set up is with a Python virtual environment (we recommend using conda). If you don't already have Anaconda3 installed, find your machine's installer [here](https://www.anaconda.com/download#downloads) and complete the installation process.
-We also recommend using a Linux machine to avoid problems with executing Bash scripts.
-
-CLEMENT: HARDWARE REQUIREMENTS? EX: MEMORY AND STORAGE?
-
-## Datasets
+### Datasets
 
 Three datasets are supported:
 
@@ -116,7 +220,7 @@ Three datasets are supported:
 * TEP (`TEP`)
     * CLEMENT FILL THIS IN
 
-### Using the Datasets
+#### Using the Datasets
 
 For your convenience, we have provided these datasets in the submission form via `datasets.tar.gz`. Normally, the SWaT and WADI datasets must be requested via the [iTrust website](https://itrust.sutd.edu.sg/itrust-labs_datasets/) and the request may take several days to be approved. For the sake of this evaluation, the cleaned and processed versions of these datasets can be used by simply extracting `datasets.tar.gz` into the `ics-anomaly-attribution` directory:
 ```sh
@@ -124,7 +228,7 @@ tar -xvzf datasets.tar.gz
 ```
 This will produce a `data` directory that contains the SWaT, WADI, and TEP datasets, ready to be used.
 
-## Models
+### Models
 
 We currently support three types of models, all using the [Keras Model API](https://keras.io/models/model/).
 
@@ -135,109 +239,7 @@ We currently support three types of models, all using the [Keras Model API](http
 * Gated Recurrent Units (`GRU`)
     * Deep learning models that provide similar functionality to LSTMs through gates, but use much less state/memory. As a result, they are quicker to train and use, and provide similarly strong performance.
 
-
-## Installation
-
-If you are on a Windows machine, we recommend using the Anaconda Prompt that came with the Anaconda3 installation. Otherwise, simply use the terminal.
-Ensure that conda is up to date with:
-```sh
-conda update conda --all
-```
-Create a Python 3.7 virtual environment called venv and activate it:
-```sh
-conda create --name venv python==3.7
-conda activate venv
-```
-Clone this repository with:
-```sh
-git clone -b steph-main-workflow https://github.com/pwwl/ics-anomaly-attribution.git
-```
-Navigate into the repository and install the requirements for this project:
-```sh
-cd ics-anomaly-attribution
-pip install -r requirements.txt
-```
-
-## Workflow 1 - CNN on SWaT Dataset
-
-This workflow will walk you through training a CNN model on the SWaT dataset, as well as generating explanations on a singular attack. Ensure you have retrieved the dataset as mentioned [here](#using-the-datasets).
-
-First, create the needed directories that will be populated with metadata:
-```sh
-bash make_dirs.sh
-```
-
-Train the CNN model on the SWaT dataset:
-```sh
-python main_train.py CNN SWAT --train_params_epochs 10
-```
-This will utilize a default configuration of two layers, a history length of 50, a kernel size of 3, and 64 units per layer for the CNN model. See detailed explanations for main_train.py [here](#model-parameters).
-
-Now generate model MSES: CLEMENT BETTER DESCRIPTION HERE
-```sh
-python save_model_mses.py CNN SWAT
-```
-
-Save detection points: CLEMENT BETTER DESCRIPTION HERE
-```sh
-python save_detection_points.py --md CNN-SWAT-l2-hist50-kern3-units64-results
-```
-
-Explain eval attacks from the `explain-eval-attacks` directory: CLEMENT BETTER DESCRIPTION HERE
-```sh
-cd explain-eval-attacks
-bash expl-full-bbox.sh
-bash expl-full-swat.sh
-```
-Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
-Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
-
-Generate rankings: CLEMENT BETTER DESCRIPTION HERE
-```sh
-python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-results
-```
-
-MENTION HERE SOMETHING ABOUT HOW IF YOU WANTED YOU WOULD GENERATE PLOTS HERE IF YOU DID THIS FOR ALL MODEL AND DATASET COMBOS TO REPRODUCE THE PLOTS FOUND IN THE PAPER
-
-## Workflow 2 - CNN on TEP Dataset
-
-This workflow is similar to workflow 1 but is performed on the TEP dataset. Because of CLEMENT BRIEFLY MENTION HERE THE DIFFERENCE WITH TEP THAT REQUIRES DIFFERENT HANDLING, the workflow is similar but utilizes modified scripts specifically for dealing with the TEP dataset. This will also generate explanations on a singular TEP attack. Ensure you have retrieved the dataset as mentioned [here](#using-the-datasets).
-
-First, create the needed directories that will be populated with metadata:
-```sh
-bash make_dirs.sh
-```
-
-Train the CNN model on the TEP dataset:
-```sh
-python main_train.py CNN TEP --train_params_epochs 10
-```
-
-Now generate model MSES: CLEMENT BETTER DESCRIPTION HERE
-```sh
-python save_model_mses.py CNN TEP
-```
-
-Save detection points: CLEMENT BETTER DESCRIPTION HERE
-```sh
-python save_detection_points.py --md CNN-TEP-l2-hist50-kern3-units64-results
-```
-
-Explain eval attacks from the `explain-eval-manipulations` directory: CLEMENT BETTER DESCRIPTION HERE
-```sh
-cd explain-eval-manipulations
-bash expl-full-bbox.sh
-bash expl-full-tep.sh
-```
-Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
-Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
-
-Generate rankings: CLEMENT BETTER DESCRIPTION HERE
-```sh
-python main_feature_properties_tep.py 1 --md CNN-TEP-l2-hist50-kern3-units64-results
-```
-
-## Parameters
+### Parameters
 
 The argparse library is used in most scripts, which can be run with the `--help` flag to display all mandatory and required arguments to the script. Here are detailed accounts of the parameters for each script ran in the workflows.
 
@@ -251,7 +253,7 @@ The argparse library is used in most scripts, which can be run with the `--help`
 - `main_feature_properties.py`: [Specific Model Parameter](#specific-model-parameter), [Specific Attack Parameter](#specific-attack-parameter)
 - `main_feature_properties_tep.py`: [Specific Model Parameter](#specific-model-parameter)
 
-### Model Parameters
+#### Model Parameters
 
 | Name      | Description | Default |
 | ---- | ---- | ---- |
@@ -266,15 +268,15 @@ The argparse library is used in most scripts, which can be run with the `--help`
 | --gru_model_params_history | The total size of the prediction window used for the GRU. When predicting on an instance, this tells the model how far back in time to use in prediction. | 50 |
 | --gru_model_params_layers'  | The number of GRU layers to use. | 2 |
 
-### Training Parameters
+#### Training Parameters
 
 | Name      | Description | Default |
 | --- | --- | --- |
 | --train_params_epochs | The number of times to go over the training data | 100 |
 | --train_params_batch_size | Batch size when training. Note: MUST be larger than all history/window values given. | 512 |
-| --store_true | Removes callbacks like early stopping | False |
+| --train_params_no_callbacks | Removes callbacks like early stopping | False |
 
-### Other Parameters
+#### Other Parameters
 
 | Name      | Description | Default |
 | --- | --- | --- |
@@ -283,36 +285,35 @@ The argparse library is used in most scripts, which can be run with the `--help`
 | --gpus | Which GPUS to use during training and evaluation? This should be specified as a GPU index value, as it is passed to the environment variable `CUDA_VISIBLE_DEVICES`. | None |
 | --run_name | If provided, stores all models in the associated `run_name` directory. Note: use `setup_run_name.sh` to create the desired `models/run_name` directory. | result |
 
-### Metrics Parameter
+#### Metrics Parameter
 
 | Name      | Description | Default |
 | --- | --- | --- |
 | --detect_params_metrics | Metrics to look over (at least one required). | F1 |
 
-### Specific Model Parameter
+#### Specific Model Parameter
 
 | Name      | Description | Default |
 | --- | --- | --- |
 | --md | Specifies an exact model to use. Format as `model-dataset-layers-history-kernel-units-runname` if model type is CNN, format as `model-dataset-layers-history-units-runname` otherwise (at least one required). | None |
 
-### Specific Attack Parameter
+#### Specific Attack Parameter
 
 | Name      | Description | Default |
 | --- | --- | --- |
 | attack | Specific attack number to use (at least one required) | None |
 
-### BBox Parameters
+#### Blackbox Attribution Parameters
 
 | Name      | Description | Default |
 | --- | --- | --- |
-| --explain_params_methods | CLEMENT DESCRIPTION HERE (MSE, LIME, SHAP, or LEMNA) | AE |
+| --explain_params_methods | Select the attribution methods(s) to use: raw MSE (MSE), LIME, SHAP, or LEMNA | MSE |
 | --num_samples | Number of samples | 5 |
 
-### Grad Parameters
+#### Gradient Attribution Parameters
 
 | Name      | Description | Default |
 | --- | --- | --- |
-| --explain_params_methods | CLEMENT DESCRIPTION HERE (SM or SG) | AE |
+| --explain_params_methods | Select the attribution method(s) to use: saliency map (SM), SmoothGrad (SG), integrated gradients (IG), expected gradients (EG) | SM |
 | --explain_params_use_top_feat | Explain based off top MSE feature, rather than entire MSE | False |
-| --explain_params_threshold | Percentile threshold for selecting candidates for explanation. 0 (default) chooses optimal. | 0 |
 | --num_samples | Number of samples | 5 |

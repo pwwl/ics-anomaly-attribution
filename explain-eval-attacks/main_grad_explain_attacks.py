@@ -151,7 +151,7 @@ def parse_arguments():
 
 	# Explain specific
 	parser.add_argument("--explain_params_methods",
-		default=['SM', 'SG'],
+		default=['SM'],
 		nargs='+',
 		type=str,
 		help="Which explanation methods to use? Options: [SM, SG, IG, EG]")
@@ -160,11 +160,6 @@ def parse_arguments():
 		action='store_true',
 		help="Explain based off top MSE feature, rather than entire MSE")
 
-	parser.add_argument("--explain_params_threshold",
-		default=0,
-		type=float,
-		help="Percentile threshold for selecting candidates for explanation. 0 (default) chooses optimal.")
-	
 	parser.add_argument("--num_samples",
 		default=5,
 		type=int,

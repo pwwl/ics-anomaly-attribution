@@ -143,7 +143,7 @@ def parse_arguments():
 
 	parser.add_argument("--explain_params_methods",
         choices=['MSE', 'LIME', 'SHAP', 'LEMNA'],
-        default='AE')
+        default='MSE')
 
 	parser.add_argument("--num_samples",
 		default=5,

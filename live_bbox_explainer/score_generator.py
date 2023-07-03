@@ -20,8 +20,7 @@
 
 import numpy as np
 import pdb
-import tep_utils
-
+from utils import tep_utils
 from pygflasso import MultiTaskGFLasso
 
 def mse_score_generator(event_detector, selected_index, Xtest):

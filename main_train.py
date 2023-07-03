@@ -31,12 +31,6 @@ import json
 import pickle
 import time
 
-# Data science ML
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score
-
 # Ignore ugly futurewarnings from np vs tf.
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning)
@@ -54,8 +48,7 @@ import tensorflow as tf
 # Custom packages
 from detector import lstm, cnn, gru
 from data_loader import load_train_data, load_test_data
-
-import utils
+from utils import utils
 
 def train_forecast_model(model_type, config, Xtrain, Xval, Ytrain, Yval):
 

@@ -38,9 +38,7 @@ from sklearn.model_selection import train_test_split
 # Custom local packages
 from data_loader import load_train_data, load_test_data
 from main_train import load_saved_model
-import metrics
-import utils
-import tep_utils
+from utils import metrics, utils, tep_utils
 
 def parse_arguments():
 

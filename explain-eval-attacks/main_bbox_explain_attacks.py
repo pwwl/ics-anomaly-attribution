@@ -39,9 +39,7 @@ from main_train import load_saved_model
 
 from live_bbox_explainer.score_generator import lime_score_generator, shap_score_generator, lemna_score_generator
 
-import attack_utils
-import tep_utils
-import utils
+from utils import attack_utils, utils
 
 np.set_printoptions(suppress=True)
 

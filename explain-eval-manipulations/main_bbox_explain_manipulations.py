@@ -40,7 +40,7 @@ from main_train import load_saved_model
 from live_bbox_explainer.score_generator import lime_score_generator, shap_score_generator, lemna_score_generator
 
 from tep_utils import load_tep_attack, get_footer_list
-import utils
+from utils import utils
 
 np.set_printoptions(suppress=True)
 

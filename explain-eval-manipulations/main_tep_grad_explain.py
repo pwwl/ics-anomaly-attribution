@@ -36,10 +36,8 @@ from live_grad_explainer import smooth_grad_mse_explainer, integrated_gradients_
 from live_grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
 from main_train import load_saved_model
 
+from utils import utils
 from tep_utils import load_tep_attack, get_skip_list
-
-import metrics
-import utils
 
 att_skip_list = get_skip_list()
 

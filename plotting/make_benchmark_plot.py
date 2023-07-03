@@ -7,7 +7,10 @@ import pdb
 import matplotlib
 import scipy.stats as ss
 
-import tep_plot_utils
+import sys
+sys.path.append('..')
+
+from utils import tep_plot_utils
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 

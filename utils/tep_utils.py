@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import pdb
 import pickle
-import metrics
+from utils import metrics
 
 # FEATURE_SETS = [
 # 	['s6', 's7', 's8', 's9', 's21', 's23', 's24', 's25', 's26', 's27', 's28', 'a10'],

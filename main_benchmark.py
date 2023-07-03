@@ -44,10 +44,7 @@ from live_bbox_explainer.score_generator import lime_score_generator, shap_score
 from live_grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
 
 from main_train import load_saved_model
-from tep_utils import get_short_colnames
-
-import attack_utils
-import utils
+from utils import tep_utils, attack_utils, utils
 
 def expl_to_anomaly_score(explain_scores):
 	assert (len(explain_scores.shape) == 3)
@@ -145,7 +142,7 @@ if __name__ == "__main__":
 	history = event_detector.params['history']
 
 	if dataset_name == 'TEP':
-		sensor_cols = get_short_colnames()
+		sensor_cols = tep_utils.get_short_colnames()
 
 	# Take a single example
 	att_point = 50000

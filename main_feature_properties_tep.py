@@ -26,8 +26,7 @@ import pickle
 import sys
 sys.path.append('explain-eval-manipulations')
 
-from tep_utils import scores_to_rank
-import tep_utils
+from utils.tep_utils import scores_to_rank
 
 np.set_printoptions(suppress=True)
 DEFAULT_CMAP = plt.get_cmap('Reds', 5)

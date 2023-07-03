@@ -6,9 +6,12 @@ import pickle
 import pdb
 import matplotlib
 
+import sys
+sys.path.append('..')
+
 import data_loader
-import tep_utils
-from attack_utils import get_attack_indices, get_attack_sds, get_rel_scores, is_actuator
+from utils import tep_utils, attack_utils
+from attack_utils import get_attack_indices, get_attack_sds, is_actuator
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 BETA_SCALE = 2.5

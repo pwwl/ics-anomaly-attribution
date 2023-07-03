@@ -9,8 +9,8 @@ import pickle
 import sys
 sys.path.append('explain-eval-attacks')
 
-from attack_utils import get_attack_indices, get_attack_sds, is_actuator
-from tep_utils import scores_to_rank
+from utils.attack_utils import get_attack_indices, get_attack_sds, is_actuator
+from utils.tep_utils import scores_to_rank
 
 import data_loader
 import argparse

@@ -33,10 +33,8 @@ sys.path.append('..')
 from data_loader import load_train_data, load_test_data
 from live_grad_explainer import smooth_grad_mse_explainer, integrated_gradients_mse_explainer, expected_gradients_mse_explainer
 from live_grad_explainer import smooth_grad_explainer, integrated_gradients_explainer
-import attack_utils
 from main_train import load_saved_model
-
-import utils
+from utils import attack_utils, utils
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 

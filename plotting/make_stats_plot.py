@@ -8,6 +8,7 @@ import matplotlib
 import scipy.stats as ss
 
 import sys
+sys.path.append('..')
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 

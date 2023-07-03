@@ -17,6 +17,7 @@
 """
 # Generic python
 from typing import Dict, List
+import argparse
 import pickle
 import sys
 
@@ -30,9 +31,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Custom local packages
-import attack_utils
-import tep_utils
-import argparse
+from utils import attack_utils, tep_utils
 
 def get_detection_points(lookup_name, dataset_name):
 

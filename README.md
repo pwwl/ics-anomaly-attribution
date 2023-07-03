@@ -60,7 +60,7 @@ conda activate venv
 ```
 Clone this repository with:
 ```sh
-git clone -b steph-main-workflow https://github.com/pwwl/ics-anomaly-attribution.git
+git clone https://github.com/pwwl/ics-anomaly-attribution.git
 ```
 Navigate into the repository and install the requirements for this project:
 ```sh

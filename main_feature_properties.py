@@ -361,7 +361,7 @@ def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 			att_start = np.min(attacks[atk_idx][0]) - history - 1
 			att_end = np.max(attacks[atk_idx]) - history - 1
 
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) # CHANGE THIS TO true5
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-true5.pkl', 'rb'))
 			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-SHAP-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) 
 			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) 
 
@@ -371,7 +371,7 @@ def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 
 			# Ignoring detections
 			first_mses = all_mses[att_start+history]
-			first_sm = smap_scores[0]											# 51 OR 0? PROBABLY 0
+			first_sm = smap_scores[0]										
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
 

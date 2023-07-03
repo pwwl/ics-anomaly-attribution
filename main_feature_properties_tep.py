@@ -1,25 +1,33 @@
+"""
+
+   Copyright 2023 Lujo Bauer, Clement Fung
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+	   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+"""
+
 import argparse
-import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
 
-import pdb
 import pickle
 
 import sys
 sys.path.append('explain-eval-manipulations')
 
-from data_loader import load_train_data, load_test_data
-from main_train import load_saved_model
-
-from attack_utils import get_attack_indices, get_attack_sds, get_rel_scores, is_actuator
-from tep_utils import get_pid, get_non_pid, get_xmv, get_skip_list, scores_to_rank
-
-import data_loader
+from tep_utils import scores_to_rank
 import tep_utils
-import utils
 
 np.set_printoptions(suppress=True)
 DEFAULT_CMAP = plt.get_cmap('Reds', 5)
@@ -30,11 +38,10 @@ SCALE = 1
 def make_detect_plot_obj_tep(lookup_tupls):
 
 	attacks = tep_utils.get_footer_list(patterns=['cons'])
-	sensor_cols = tep_utils.get_short_colnames()
 
-	detection_points = pickle.load(open('ccs-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
 
-	for lookup_name, history in lookup_tupls
+	for lookup_name, history in lookup_tupls:
 
 		model_detection_points = detection_points[lookup_name]
 		
@@ -66,9 +73,9 @@ def make_detect_plot_obj_tep(lookup_tupls):
 
 			all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-{attack_footer}-ns.npy')
 			detect_idx = model_detection_points[attack_footer]
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-saliency_map_mse_history-{lookup_name}-{attack_footer}-detect5.pkl', 'rb')) 
-			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-SHAP-{lookup_name}-{attack_footer}-detect5.pkl', 'rb')) 
-			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-detect5.pkl', 'rb')) 
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-saliency_map_mse_history-{lookup_name}-{attack_footer}-detect150.pkl', 'rb')) 
+			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-SHAP-{lookup_name}-{attack_footer}-detect150.pkl', 'rb')) 
+			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-detect150.pkl', 'rb')) 
 
 			smap_scores = np.sum(np.abs(smap_scores_full), axis=1)
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
@@ -130,8 +137,6 @@ def make_detect_plot_obj_tep(lookup_tupls):
 			'lemna_ranking': first_scatter_obj[det_idx,3],
 		})
 
-		pdb.set_trace()
-
 		pickle.dump(df, open(f'realdet-{lookup_name}.pkl', 'wb'))
 
 def make_tep_ideal_plot_obj(lookup_tupls):
@@ -168,9 +173,9 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 			print(attack_footer)
 			all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-{attack_footer}-ns.npy')
 
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{attack_footer}-true5.pkl', 'rb')) 
-			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-SHAP-{lookup_name}-{attack_footer}-true5.pkl', 'rb')) 
-			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-true5.pkl', 'rb')) 
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{attack_footer}-true150.pkl', 'rb')) 
+			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-SHAP-{lookup_name}-{attack_footer}-true150.pkl', 'rb')) 
+			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-true150.pkl', 'rb')) 
 			
 			smap_scores = np.sum(np.abs(smap_scores_full), axis=1)
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
@@ -201,7 +206,6 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 				sensor_types_list.append('Actuator')
 			else:
 				print('Missing label type')
-				pdb.set_trace()
 
 			labels_list.append(label)
 			pattern_list.append(pattern)
@@ -230,14 +234,6 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 		})
 
 		sen_idx = np.where(df['sensor_type'] == 'Sensor')[0]
-		act_idx = np.where(df['sensor_type'] == 'Actuator')[0]
-
-		print('------------------------')
-		print(f'MSE sen vs act: {np.mean(first_scatter_obj[sen_idx, 0])} vs {np.mean(first_scatter_obj[act_idx, 0])}')
-		print(f'SM sen vs act: {np.mean(first_scatter_obj[sen_idx, 1])} vs {np.mean(first_scatter_obj[act_idx, 1])}')
-		print(f'SHAP sen vs act: {np.mean(first_scatter_obj[sen_idx, 2])} vs {np.mean(first_scatter_obj[act_idx, 2])}')
-		print(f'LEMNA sen vs act: {np.mean(first_scatter_obj[sen_idx, 3])} vs {np.mean(first_scatter_obj[act_idx, 3])}')
-		print('------------------------')
 
 		pickle.dump(df, open(f'idealdet-{lookup_name}.pkl', 'wb'))
 
@@ -355,15 +351,8 @@ def make_tep_timing_plot_obj(lookup_tupls):
 
 				if np.sum(detection) > 0:
 					new_detect_point = np.min(np.where(detection)) - 2
-
-					if detect_point != new_detect_point:
-						print(f'Attack {attack_footer} after windowing: detect point moved from {detect_point} to {new_detect_point}')
-					else:
-						print(f'Attack {attack_footer} same detect point {detect_point}.')
-
 				else:
 					print(f'Attack {attack_footer} is now missed.')
-			
 			else:
 
 				print(f'Attack {attack_footer} still missed.')
@@ -398,7 +387,6 @@ def make_tep_timing_plot_obj(lookup_tupls):
 				sensor_types_list.append('Actuator')
 			else:
 				print('Missing label type')
-				pdb.set_trace()
 
 			detect_point_list.append(detect_point)
 			labels_list.append(label)
@@ -566,7 +554,6 @@ def make_detect_timing(lookup_tupls):
 				sensor_types_list.append('Actuator')
 			else:
 				print('Missing label type')
-				pdb.set_trace()
 
 			length_list.append(4000)
 			detect_list.append(detect_idx)
@@ -602,8 +589,6 @@ def make_detect_timing(lookup_tupls):
 			'slice_best_ranking': scatter_obj[det_idx, 14],
 			'slice_tavg_ranking': scatter_obj[det_idx, 15],
 		})
-
-		pdb.set_trace()
 
 		pickle.dump(df, open(f'real-timing-{lookup_name}.pkl', 'wb'))
 		pickle.dump(full_slice_values, open(f'full-values-real-{lookup_name}.pkl', 'wb'))
@@ -641,11 +626,11 @@ def make_stealth_plot_obj(lookup_tupls):
 			if attack_footer not in model_detection_points:
 				continue
 
-			all_mses = np.load(f'explanations-dir/explain23-tep-mses/mses-{lookup_name}-{attack_footer}-ns.npy')
+			all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-{attack_footer}-ns.npy')
 			detect_idx = model_detection_points[attack_footer]
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-saliency_map_mse_history-{lookup_name}-{attack_footer}-detect5.pkl', 'rb')) 
-			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-SHAP-{lookup_name}-{attack_footer}-detect5.pkl', 'rb')) 
-			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-detect5.pkl', 'rb')) 
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-saliency_map_mse_history-{lookup_name}-{attack_footer}-detect150.pkl', 'rb')) 
+			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-SHAP-{lookup_name}-{attack_footer}-detect150.pkl', 'rb')) 
+			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-LEMNA-{lookup_name}-{attack_footer}-detect150.pkl', 'rb')) 
 
 			smap_scores = np.sum(np.abs(smap_scores_full), axis=1)
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
@@ -694,20 +679,6 @@ def make_stealth_plot_obj(lookup_tupls):
 		})
 
 		pickle.dump(df, open(f'realdet-stealth-{lookup_name}.pkl', 'wb'))
-		
-		sensors = ['s2', 's3', 's8', 's14', 's17']	
-		expls = ['detect_point', 'mse_ranking', 'smap_ranking', 'shap_ranking', 'lemna_ranking']
-		dfs = df[df['sensor'].isin(sensors)]
-
-		for exp in expls:
-			
-			avg_cons = np.mean(dfs[dfs['sd_type'] == 'cons'][exp])
-			avg_csum = np.mean(dfs[dfs['sd_type'] == 'csum'][exp])
-			avg_line = np.mean(dfs[dfs['sd_type'] == 'line'][exp])
-
-			print(f'Avg cons {exp}: {avg_cons}')
-			print(f'Avg csum {exp}: {avg_csum}')
-			print(f'Avg line {exp}: {avg_line}')
 
 def parse_arguments():
 	
@@ -749,7 +720,7 @@ def parse_arguments():
 			if not kernel.startswith("kern") or not kernel[len("kern"):].isnumeric():
 				raise SystemExit(f"ERROR: Provided invalid kernel size {kernel}")
 		
-		lookup_names.append((arg, dataset, int(history[len("hist"):])))
+		lookup_names.append((arg, int(history[len("hist"):])))
 
 	return lookup_names
 
@@ -765,4 +736,4 @@ if __name__ == "__main__":
 
 	make_stealth_plot_obj(lookup_tupls)
 
-	print('Done')
+	print('Done!')

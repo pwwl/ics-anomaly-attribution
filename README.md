@@ -77,32 +77,38 @@ First, create the needed directories that will be populated with metadata:
 bash make_dirs.sh
 ```
 
-Train the CNN model on the SWaT dataset:
+Next, train a CNN model on the SWaT dataset:
 ```sh
 python main_train.py CNN SWAT --train_params_epochs 10
 ```
 This will utilize a default configuration of two layers, a history length of 50, a kernel size of 3, and 64 units per layer for the CNN model. See detailed explanations for main_train.py [here](#model-parameters).
 
-Now generate model MSES: CLEMENT BETTER DESCRIPTION HERE
+Next, use the CNN model to make predictions on the SWaT test dataset, and save the corresponding MSES.
 ```sh
 python save_model_mses.py CNN SWAT
 ```
 
-Save detection points: CLEMENT BETTER DESCRIPTION HERE
+Additionally, use the CNN model to make predictions on the SWaT test dataset, and save the corresponding detection points. 
+The default detection threshold is set at the 99.95-th percentile validation error.
 ```sh
 python save_detection_points.py --md CNN-SWAT-l2-hist50-kern3-units64-results
 ```
 
-Explain eval attacks from the `explain-eval-attacks` directory: CLEMENT BETTER DESCRIPTION HERE
+Run attribution methods for SWaT attack #1, using the scripts in the `explain-eval-attacks` directory. 
+Saliency maps (SM), SHAP, and LEMNA can be executed as follows. 
+Each script will collect all attribution scores for 150 timesteps.
 ```sh
 cd explain-eval-attacks
-bash expl-full-bbox.sh
-bash expl-full-swat.sh
+python main_grad_explain_attacks.py CNN SWAT 1 --explain_params_methods SM --run_name results --num_samples 150
+python main_bbox_explain_attacks.py CNN SWAT 1 --explain_params_methods SHAP --run_name results --num_samples 150
+python main_bbox_explain_attacks.py CNN SWAT 1 --explain_params_methods LEMNA --run_name results --num_samples 150
 ```
+
+Bash scripts `expl-full-bbox.sh` and `expl-full-swat.sh` are provided for reference.
 Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
 Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
 
-Generate rankings: CLEMENT BETTER DESCRIPTION HERE
+Finally, rank the attribution methods for SWaT attack #1: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies.
 ```sh
 python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-results
 ```
@@ -111,41 +117,51 @@ MENTION HERE SOMETHING ABOUT HOW IF YOU WANTED YOU WOULD GENERATE PLOTS HERE IF 
 
 ### Workflow 2 - CNN on TEP Dataset
 
-This workflow is similar to workflow 1 but is performed on the TEP dataset. Because of CLEMENT BRIEFLY MENTION HERE THE DIFFERENCE WITH TEP THAT REQUIRES DIFFERENT HANDLING, the workflow is similar but utilizes modified scripts specifically for dealing with the TEP dataset. This will also generate explanations on a singular TEP attack. Ensure you have retrieved the dataset as mentioned [here](#using-the-datasets).
+This workflow is similar to workflow 1 but is performed on the TEP dataset. 
+Because of differences in how features are internally represented between datasets, the workflow uses slightly modified scripts specifically for dealing with the TEP dataset. 
+This will also generate explanations on a singular TEP attack. Ensure you have retrieved the training dataset as mentioned [here](#using-the-datasets).
+The sample attack used for this workflow is provided in `tep-attacks/matlab/TEP_test_cons_p2s_s1.csv`, which is a constant, two-standard-deviation manipulation on the first TEP sensor.
 
 First, create the needed directories that will be populated with metadata:
 ```sh
 bash make_dirs.sh
 ```
 
-Train the CNN model on the TEP dataset:
+Next, train a CNN model on the TEP dataset:
 ```sh
 python main_train.py CNN TEP --train_params_epochs 10
 ```
 
-Now generate model MSES: CLEMENT BETTER DESCRIPTION HERE
+Next, use the CNN model to make predictions on the TEP manipulation and save the corresponding MSES.
 ```sh
 python save_model_mses.py CNN TEP
 ```
 
-Save detection points: CLEMENT BETTER DESCRIPTION HERE
+Additionally, use the CNN model to make predictions on the TEP manipulation and save the corresponding detection points. 
 ```sh
 python save_detection_points.py --md CNN-TEP-l2-hist50-kern3-units64-results
 ```
 
-Explain eval attacks from the `explain-eval-manipulations` directory: CLEMENT BETTER DESCRIPTION HERE
+Run attribution methods for the TEP manipulation, using the scripts in the `explain-eval-manipulations` directory. 
+Saliency maps (SM), SHAP, and LEMNA can be executed as follows. 
+Each script will collect all attribution scores for 150 timesteps.
 ```sh
-cd explain-eval-manipulations
-bash expl-full-bbox.sh
-bash expl-full-tep.sh
+cd explain-eval-attacks
+python main_tep_grad_explain.py.py CNN TEP --explain_params_methods SM --run_name results --num_samples 150
+python main_bbox_explain_manipulations.py.py CNN TEP --explain_params_methods SHAP --run_name results --num_samples 150
+python main_bbox_explain_manipulations.py.py CNN TEP --explain_params_methods LEMNA --run_name results --num_samples 150
 ```
+
+Bash scripts `expl-full-bbox.sh` and `expl-full-tep.sh` are provided for reference.
+
 Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
 Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
 
-Generate rankings: CLEMENT BETTER DESCRIPTION HERE
+Finally, rank the attribution methods for the TEP manipulation: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies.
 ```sh
-python main_feature_properties_tep.py 1 --md CNN-TEP-l2-hist50-kern3-units64-results
+python main_feature_properties_tep.py --md CNN-TEP-l2-hist50-kern3-units64-results
 ```
+
 ## Reference Information
 
 ### Overview of the Repository
@@ -210,15 +226,15 @@ python main_feature_properties_tep.py 1 --md CNN-TEP-l2-hist50-kern3-units64-res
 Three datasets are supported:
 
 * [Secure Water Treatment Plant](https://itrust.sutd.edu.sg/testbeds/secure-water-treatment-swat/) (`SWAT`)
-    * A 6 stage water treatment process, collected from a water plant testbed in Singapore.
-    * Contains 77 sensors/actuators, and 6 labelled cyber-attacks
-    * Download instructions are in the `data/SWAT` folder.
+    * A 51-feature, 6-stage water treatment process, collected from a water plant testbed in Singapore.
+    * Provided by the SUTD iTrust website.
 * [Water Distribution](https://itrust.sutd.edu.sg/testbeds/water-distribution-wadi/) (`WADI`)
-    * A 123 feature (sensors, actuators) dataset of a water distribution system.
+    * A 123 feature dataset of a water distribution system. collected from a water plant testbed in Singapore.
     * Like SWAT, needs to be downloaded from the SUTD iTrust website.
-    * Some features were missing small number of values, and the script `process_WADI.py` does a manual interpolation of these gaps.
-* TEP (`TEP`)
-    * CLEMENT FILL THIS IN
+* [Tennessee Eastman Process](https://depts.washington.edu/control/LARRY/TE/download.html) (`TEP`)
+    * A 53 feature dataset of a chemical process, collected from a public MATLAB simulation environment.
+    * Testing data for this dataset was created by modifying the simulator and systematically injecting manipulations into the process. 
+    * The modified simulator is [publicly available](https://github.com/pwwl/tep-attack-simulator).
 
 #### Using the Datasets
 

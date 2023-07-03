@@ -9,10 +9,7 @@ import pickle
 import sys
 sys.path.append('explain-eval-attacks')
 
-from data_loader import load_train_data, load_test_data
-from main_train import load_saved_model
-
-from attack_utils import get_attack_indices, get_attack_sds, get_rel_scores, is_actuator
+from attack_utils import get_attack_indices, get_attack_sds, is_actuator
 from tep_utils import scores_to_rank
 
 import data_loader
@@ -24,7 +21,7 @@ DEFAULT_CMAP = plt.get_cmap('Reds', 5)
 HOUR = 2000
 SCALE = 1
 
-def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
+def real_detection_rankings(lookup_tupls, attacks_to_consider):
 
 	all_dfs = []
 	all_plots = []
@@ -36,7 +33,7 @@ def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 		print(f'Processing {dataset} dataset')
 		
 		attacks, labels = get_attack_indices(dataset)
-		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		sds = get_attack_sds(dataset)
 		sds_to_consider = []
@@ -45,10 +42,8 @@ def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 				sds_to_consider.append(sd)
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
-		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 
 		print(f'for {lookup_name}')
-		print(f'avg_val_mse: {np.mean(val_mses)}')
 
 		first_scatter_obj = np.zeros((len(sds_to_consider), 4))
 		
@@ -75,16 +70,16 @@ def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 				continue
 
 			detect_idx = model_detection_points[atk_idx]
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-detect5.pkl', 'rb')) 
-			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-SHAP-{lookup_name}-{atk_idx}-detect5.pkl', 'rb')) 
-			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-detect5.pkl', 'rb')) 
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-detect150.pkl', 'rb')) 
+			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-SHAP-{lookup_name}-{atk_idx}-detect150.pkl', 'rb')) 
+			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-detect-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-detect150.pkl', 'rb')) 
 
 			smap_scores = np.sum(np.abs(smap_scores_full), axis=1)
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
 			# Using first detection point
-			first_mses = all_mses[att_start+history+detect_idx]
+			first_mses = all_mses[att_start+detect_idx]
 			first_sm = smap_scores[0]
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
@@ -135,12 +130,9 @@ def make_detect_plot_obj(lookup_tupls, attacks_to_consider):
 			'lemna_ranking': first_scatter_obj[det_idx,3]
 		})
 
-		pickle.dump(df, open(f'meta-storage/realdet-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/real-detection-ranks-{lookup_name}.pkl', 'wb'))
 
-def make_detect_timing(lookup_tupls, attacks_to_consider):
-
-	all_dfs = []
-	all_plots = []
+def real_detection_timing(lookup_tupls, attacks_to_consider):
 	
 	for lookup_name, dataset, history in lookup_tupls:
 
@@ -150,7 +142,7 @@ def make_detect_timing(lookup_tupls, attacks_to_consider):
 		print(f'Processing {dataset} dataset')
 		
 		attacks, labels = get_attack_indices(dataset)
-		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		sds = get_attack_sds(dataset)
 		sds_to_consider = []
@@ -159,10 +151,8 @@ def make_detect_timing(lookup_tupls, attacks_to_consider):
 				sds_to_consider.append(sd)
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
-		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 
 		print(f'for {lookup_name}')
-		print(f'avg_val_mse: {np.mean(val_mses)}')
 
 		scatter_obj = np.zeros((len(sds_to_consider), 16))
 		
@@ -316,17 +306,14 @@ def make_detect_timing(lookup_tupls, attacks_to_consider):
 			'slice_tavg_ranking': scatter_obj[det_idx, 15],
 		})
 
-		pickle.dump(df, open(f'meta-storage/real-timing-{lookup_name}.pkl', 'wb'))
-		pickle.dump(full_slice_values, open(f'meta-storage/full-values-real-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/real-detection-timing-ranks-{lookup_name}.pkl', 'wb'))
+		pickle.dump(full_slice_values, open(f'meta-storage/attribution-ranks/real-detection-timing-scores-{lookup_name}.pkl', 'wb'))
 
-def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
-
-	all_dfs = []
-	all_plots = []
+def ideal_detection_rankings(lookup_tupls, attacks_to_consider):
 
 	for lookup_name, dataset, history in lookup_tupls:
 
-		Xtest, Ytest, sensor_cols = data_loader.load_test_data(dataset)
+		_, _, sensor_cols = data_loader.load_test_data(dataset)
 		print(f'Processing {dataset} dataset')
 
 		attacks, labels = get_attack_indices(dataset)
@@ -337,10 +324,8 @@ def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 				sds_to_consider.append(sd)
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
-		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 
 		print(f'for {lookup_name}')
-		print(f'avg_val_mse: {np.mean(val_mses)}')
 
 		first_scatter_obj = np.zeros((len(sds_to_consider), 4))
 		
@@ -361,19 +346,19 @@ def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 			att_start = np.min(attacks[atk_idx][0]) - history - 1
 			att_end = np.max(attacks[atk_idx]) - history - 1
 
-			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-true5.pkl', 'rb'))
-			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-SHAP-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) 
-			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-true5.pkl', 'rb')) 
+			smap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-saliency_map_mse_history-{lookup_name}-{atk_idx}-true150.pkl', 'rb'))
+			shap_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-SHAP-{lookup_name}-{atk_idx}-true150.pkl', 'rb')) 
+			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-true150.pkl', 'rb')) 
 
 			smap_scores = np.sum(np.abs(smap_scores_full), axis=1)
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
-			# Ignoring detections
+			# Ignoring detections, select the ideal point (after history)
 			first_mses = all_mses[att_start+history]
-			first_sm = smap_scores[0]										
-			first_shap = shap_scores[0]
-			first_lemna = lemna_scores[0]
+			first_sm = smap_scores[history]										
+			first_shap = shap_scores[history]
+			first_lemna = lemna_scores[history]
 
 			first_ranking = scores_to_rank(first_mses, col_idx)
 			first_sm_ranking = scores_to_rank(first_sm, col_idx)
@@ -417,9 +402,9 @@ def make_ideal_plot_obj(lookup_tupls, attacks_to_consider):
 			'lemna_ranking': first_scatter_obj[:,3],
 		})
 
-		pickle.dump(df, open(f'meta-storage/model-detection-ranks/idealdet-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/ideal-detection-ranks-{lookup_name}.pkl', 'wb'))
 
-def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
+def ideal_detection_timing(lookup_tupls, attacks_to_consider):
 		
 	for lookup_name, dataset, history in lookup_tupls:
 
@@ -433,17 +418,13 @@ def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
 		for sd in sds:
 			if sd[0] in attacks_to_consider:
 				sds_to_consider.append(sd)
-		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
-		model_detection_points = detection_points[lookup_name]
 
-		all_detection_points = pickle.load(open('meta-storage/all-detection-points.pkl', 'rb'))
-		model_all_detection_points = all_detection_points[lookup_name]
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
+		model_detection_points = detection_points[lookup_name]
 		
 		all_mses = np.load(f'meta-storage/model-mses/mses-{lookup_name}-ns.npy')
-		val_mses = np.load(f'meta-storage/model-mses/mses-val-{lookup_name}-ns.npy')
 
 		print(f'for {lookup_name}')
-		print(f'avg_val_mse: {np.mean(val_mses)}')
 
 		full_slice_values = np.zeros((len(sds_to_consider), 150, ncols, 4))
 		scatter_obj = np.zeros((len(sds_to_consider), 16))
@@ -477,7 +458,6 @@ def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
 			lemna_scores_full = pickle.load(open(f'explanations-dir/explain23-pkl/explanations-LEMNA-{lookup_name}-{atk_idx}-true150.pkl', 'rb')) 
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
-			# TODO: if needed, try a different slicing
 			mse_rankings = np.zeros(150)
 			sm_rankings = np.zeros(150)
 			shap_rankings = np.zeros(150)
@@ -494,7 +474,6 @@ def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
 			lemna_tavg = np.zeros(len(sensor_cols))
 			slice_tavg = np.zeros(len(sensor_cols))
 
-			# Ignoring detections
 			for i in range(150):
 
 				mse_slice = mse_scores[i]
@@ -540,8 +519,6 @@ def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
 			# Record detection point, add to plot
 			if atk_idx in model_detection_points:
 				detect_point = model_detection_points[atk_idx]
-				all_points = model_all_detection_points[atk_idx]
-
 			else:
 
 				detect_point = -1
@@ -608,14 +585,14 @@ def make_timing_plot_obj(lookup_tupls, attacks_to_consider):
 			'slice_tavg_ranking': scatter_obj[:, 15],
 		})
 
-		pickle.dump(df, open(f'timing-{lookup_name}.pkl', 'wb'))
-		pickle.dump(full_slice_values, open(f'meta-storage/full-values-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/ideal-detection-timing-ranks-{lookup_name}.pkl', 'wb'))
+		pickle.dump(full_slice_values, open(f'meta-storage/attribution-ranks/ideal-detection-timing-scores-{lookup_name}.pkl', 'wb'))
 
 def parse_arguments():
 	
 	parser = argparse.ArgumentParser()
 	model_choices = set(['CNN', 'GRU', 'LSTM'])
-	data_choices = set(['SWAT', 'WADI'])
+	dataset_choices = set(['SWAT', 'WADI'])
 
 	parser.add_argument("attack",
 		help="Which attack to explore?",
@@ -657,19 +634,18 @@ def parse_arguments():
 			if not kernel.startswith("kern") or not kernel[len("kern"):].isnumeric():
 				raise SystemExit(f"ERROR: Provided invalid kernel size {kernel}")
 		
-		lookup_names.append((arg, int(history[len("hist"):])))
+		lookup_names.append((arg, dataset, int(history[len("hist"):])))
 
 	return lookup_names, set(parser.parse_args().attack)
 
 if __name__ == "__main__":
 
-
 	lookup_tupls, attacks = parse_arguments()
 
-	make_ideal_plot_obj(lookup_tupls, attacks)
-	make_detect_plot_obj(lookup_tupls, attacks)
+	ideal_detection_rankings(lookup_tupls, attacks)
+	real_detection_rankings(lookup_tupls, attacks)
 	
-	make_timing_plot_obj(lookup_tupls, attacks)
-	make_detect_timing(lookup_tupls, attacks)
+	ideal_detection_timing(lookup_tupls, attacks)
+	real_detection_timing(lookup_tupls, attacks)
 
 	print('Done')

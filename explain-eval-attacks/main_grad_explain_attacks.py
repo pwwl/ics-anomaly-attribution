@@ -268,7 +268,7 @@ if __name__ == "__main__":
 		eg_baseline = None
 
 	lookup_name = f'{model_name}-{run_name}'
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	samples = args.num_samples
 

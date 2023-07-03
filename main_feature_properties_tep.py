@@ -35,14 +35,13 @@ DEFAULT_CMAP = plt.get_cmap('Reds', 5)
 HOUR = 2000
 SCALE = 1
 
-def make_detect_plot_obj_tep(lookup_tupls):
+def real_detection_rankings(lookup_tupls):
 
 	attacks = tep_utils.get_footer_list(patterns=['cons'])
 
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
-
 	for lookup_name, history in lookup_tupls:
 
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		
 		scatter_obj = np.zeros((len(attacks), 6))
@@ -82,7 +81,7 @@ def make_detect_plot_obj_tep(lookup_tupls):
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
 			# Using first detection point
-			first_mses = all_mses[att_start+history+detect_idx]
+			first_mses = all_mses[att_start+detect_idx]
 			first_sm = smap_scores[0]
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
@@ -137,9 +136,9 @@ def make_detect_plot_obj_tep(lookup_tupls):
 			'lemna_ranking': first_scatter_obj[det_idx,3],
 		})
 
-		pickle.dump(df, open(f'realdet-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/real-detection-ranks-{lookup_name}.pkl', 'wb'))
 
-def make_tep_ideal_plot_obj(lookup_tupls):
+def ideal_detection_rankings(lookup_tupls):
 
 	attack_footers = tep_utils.get_footer_list(patterns=['cons'])
 	sensor_cols = tep_utils.get_short_colnames()
@@ -154,8 +153,6 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 		pattern_list = []
 		sd_list = []
 		val_type_list = []
-
-		total_lemna = 0
 
 		for foot_idx in range(len(attack_footers)):
 			
@@ -181,12 +178,11 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 			shap_scores = np.sum(np.abs(shap_scores_full), axis=1)
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
-			# Ignoring detections
+			# Ignoring detections, select the ideal point (after history)
 			first_mses = all_mses[att_start+history]
-			first_sm = smap_scores[0]
-			first_shap = shap_scores[0]
-			first_lemna = lemna_scores[0]
-			total_lemna += np.mean(first_lemna)
+			first_sm = smap_scores[history]
+			first_shap = shap_scores[history]
+			first_lemna = lemna_scores[history]
 
 			first_ranking = scores_to_rank(first_mses, col_idx)
 			first_sm_ranking = scores_to_rank(first_sm, col_idx)
@@ -214,10 +210,10 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 			val_type_list.append('float')
 
 		print('------------------------')
-		print(f'Average first MSE ranking: {np.mean(first_scatter_obj[:,0])}')
-		print(f'Average first sm ranking: {np.mean(first_scatter_obj[:,1])}')
-		print(f'Average first SHAP ranking: {np.mean(first_scatter_obj[:,2])}')
-		print(f'Average first LEMNA ranking: {np.mean(first_scatter_obj[:,3])}')
+		print(f'Average ideal MSE ranking: {np.mean(first_scatter_obj[:,0])}')
+		print(f'Average ideal sm ranking: {np.mean(first_scatter_obj[:,1])}')
+		print(f'Average ideal SHAP ranking: {np.mean(first_scatter_obj[:,2])}')
+		print(f'Average ideal LEMNA ranking: {np.mean(first_scatter_obj[:,3])}')
 		print('------------------------')
 		print('------------------------')
 
@@ -233,18 +229,16 @@ def make_tep_ideal_plot_obj(lookup_tupls):
 			'lemna_ranking': first_scatter_obj[:,3],
 		})
 
-		sen_idx = np.where(df['sensor_type'] == 'Sensor')[0]
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/ideal-detection-ranks-{lookup_name}.pkl', 'wb'))
 
-		pickle.dump(df, open(f'idealdet-{lookup_name}.pkl', 'wb'))
-
-def make_tep_timing_plot_obj(lookup_tupls):
+def ideal_detection_timing(lookup_tupls):
 	
 	for lookup_name, history in lookup_tupls:
 
-		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 
-		all_detection_points = pickle.load(open('meta-storage/all-detection-points.pkl', 'rb'))
+		all_detection_points = pickle.load(open(f'meta-storage/{lookup_name}-all-detection-points.pkl', 'rb'))
 		model_all_detection_points = all_detection_points[lookup_name]
 
 		attack_footers = tep_utils.get_footer_list(patterns=['cons'])
@@ -423,19 +417,19 @@ def make_tep_timing_plot_obj(lookup_tupls):
 			'slice_tavg_opt_ranking': scatter_obj[:, 16],
 		})
 
-		pickle.dump(df, open(f'timing-{lookup_name}.pkl', 'wb'))
-		pickle.dump(full_slice_values, open(f'full-values-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/ideal-detection-timing-ranks-{lookup_name}.pkl', 'wb'))
+		pickle.dump(full_slice_values, open(f'meta-storage/attribution-ranks/ideal-detection-timing-scores-{lookup_name}.pkl', 'wb'))
 	
 
-def make_detect_timing(lookup_tupls):
+def real_detection_timing(lookup_tupls):
 
 	attacks = tep_utils.get_footer_list(patterns=['cons'])
 	sensor_cols = tep_utils.get_short_colnames()
 	ncols = len(sensor_cols)
 
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
-
 	for lookup_name, history in lookup_tupls:
+		
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		
 		scatter_obj = np.zeros((len(attacks), 16))
@@ -590,16 +584,16 @@ def make_detect_timing(lookup_tupls):
 			'slice_tavg_ranking': scatter_obj[det_idx, 15],
 		})
 
-		pickle.dump(df, open(f'real-timing-{lookup_name}.pkl', 'wb'))
-		pickle.dump(full_slice_values, open(f'full-values-real-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/real-detection-timing-ranks-{lookup_name}.pkl', 'wb'))
+		pickle.dump(full_slice_values, open(f'meta-storage/attribution-ranks/real-detection-timing-scores-{lookup_name}.pkl', 'wb'))
 
-def make_stealth_plot_obj(lookup_tupls):
+def stealthy_ranks(lookup_tupls):
 
 	for lookup_name, history in lookup_tupls:
 
 		attacks = tep_utils.get_footer_list(patterns=['cons', 'csum', 'line'], mags=['p2s'], locations='pid')
 
-		detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+		detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 		model_detection_points = detection_points[lookup_name]
 		
 		first_scatter_obj = np.zeros((len(attacks), 4))
@@ -637,7 +631,7 @@ def make_stealth_plot_obj(lookup_tupls):
 			lemna_scores = np.sum(np.abs(lemna_scores_full), axis=1)
 
 			# Using first detection point
-			first_mses = all_mses[att_start+history+detect_idx]
+			first_mses = all_mses[att_start+detect_idx]
 			first_sm = smap_scores[0]
 			first_shap = shap_scores[0]
 			first_lemna = lemna_scores[0]
@@ -678,7 +672,7 @@ def make_stealth_plot_obj(lookup_tupls):
 			'lemna_ranking': first_scatter_obj[det_idx,3],
 		})
 
-		pickle.dump(df, open(f'realdet-stealth-{lookup_name}.pkl', 'wb'))
+		pickle.dump(df, open(f'meta-storage/attribution-ranks/real-detection-stealthy-ranks-{lookup_name}.pkl', 'wb'))
 
 def parse_arguments():
 	
@@ -728,12 +722,12 @@ if __name__ == "__main__":
 
 	lookup_tupls = parse_arguments()
 
-	make_tep_ideal_plot_obj(lookup_tupls)
-	make_detect_plot_obj_tep(lookup_tupls)
+	ideal_detection_rankings(lookup_tupls)
+	real_detection_rankings(lookup_tupls)
+	
+	ideal_detection_timing(lookup_tupls)
+	real_detection_timing(lookup_tupls)
 
-	make_tep_timing_plot_obj(lookup_tupls)
-	make_detect_timing(lookup_tupls)
-
-	make_stealth_plot_obj(lookup_tupls)
+	stealthy_ranks(lookup_tupls)
 
 	print('Done!')

@@ -55,7 +55,7 @@ def explain_true_position(event_detector, run_name, model_name, explainer, Xtest
 
 	for i in range(num_samples):
 
-		# Go at least 1 history deep in the history
+		# Go at least 1 history deep
 		att_start = attack_start + i - history - 1
 		att_end = attack_start + i + 1
 
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 		eg_baseline = None
 
 	lookup_name = f'{model_name}-{run_name}'
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	Xtest, Ytest, sensor_cols = load_tep_attack(dataset_name, attack_footer)
 	num_samples = args.num_samples

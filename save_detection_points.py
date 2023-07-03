@@ -153,16 +153,16 @@ if __name__ == "__main__":
 	
 	for lookup_tupl in lookup_tupls:
 			
-			if lookup_tupl[1] == 'TEP':
-				detection_lookup, detection_full_lookup = get_tep_detection_points(lookup_tupl[0])
-			else:
-				detection_lookup, detection_full_lookup = get_detection_points(lookup_tupl[0], lookup_tupl[1])
-			
-			model_detection_lookup[lookup_tupl[0]] = detection_lookup
-			model_detection_full_lookup[lookup_tupl[0]] = detection_full_lookup
+		if lookup_tupl[1] == 'TEP':
+			detection_lookup, detection_full_lookup = get_tep_detection_points(lookup_tupl[0])
+		else:
+			detection_lookup, detection_full_lookup = get_detection_points(lookup_tupl[0], lookup_tupl[1])
+		
+		model_detection_lookup[lookup_tupl[0]] = detection_lookup
+		model_detection_full_lookup[lookup_tupl[0]] = detection_full_lookup
 
-	pickle.dump(model_detection_lookup, open('meta-storage/detection-points.pkl' ,'wb'))
-	pickle.dump(model_detection_full_lookup, open('meta-storage/all-detection-points.pkl' ,'wb'))
-	print("Saved meta-storage/detection-points.pkl")
-	print("Saved meta-storage/all-detection-points.pkl")
+	pickle.dump(model_detection_lookup, open(f'meta-storage/{lookup_tupl[0]}-detection-points.pkl' ,'wb'))
+	pickle.dump(model_detection_full_lookup, open(f'meta-storage/{lookup_tupl[0]}-all-detection-points.pkl' ,'wb'))
+	print(f"Saved meta-storage/{lookup_tupl[0]}-detection-points.pkl")
+	print(f"Saved meta-storage/{lookup_tupl[0]}-all-detection-points.pkl")
 	print(f"Finished!")

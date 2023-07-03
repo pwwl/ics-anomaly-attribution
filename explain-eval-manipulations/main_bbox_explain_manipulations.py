@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 import pdb
 import pickle
 
+import lime
+import shap
+
 # Internal imports
 import os
 import sys
@@ -45,8 +48,6 @@ HOUR = 2000
 
 def explain_true_position(event_detector, lookup_name, attack_footer, Xtest, method='MSE', expl=None, num_samples=1):
 
-	#full_test_errors = event_detector.reconstruction_errors(Xtest, batches=True, verbose=0)
-
 	history = event_detector.params['history']
 	nsensors = Xtest.shape[1]
 
@@ -55,7 +56,6 @@ def explain_true_position(event_detector, lookup_name, attack_footer, Xtest, met
 	else:
 		full_scores = np.zeros((num_samples, nsensors))
 
-	# att_start = 10000 + history
 	att_start = 10000
 
 	print('============================')
@@ -74,6 +74,8 @@ def explain_true_position(event_detector, lookup_name, attack_footer, Xtest, met
 			exp_output = lemna_score_generator(event_detector, Xinput, Yinput)
 		elif method == 'SHAP':
 			exp_output = shap_score_generator(event_detector, expl, Xinput, Yinput)
+		elif method == 'LIME':
+			exp_output = lime_score_generator(event_detector, expl, Xinput, Yinput)
 		else:
 			exp_output = (event_detector.predict(Xinput) - Yinput)**2
 
@@ -113,6 +115,8 @@ def explain_detect(event_detector, lookup_name, attack_footer, Xtest, method='MS
 			exp_output = lemna_score_generator(event_detector, Xinput, Yinput)
 		elif method == 'SHAP':
 			exp_output = shap_score_generator(event_detector, expl, Xinput, Yinput)
+		elif method == 'LIME':
+			exp_output = lime_score_generator(event_detector, expl, Xinput, Yinput)
 		else:
 			exp_output = (event_detector.predict(Xinput) - Yinput)**2
 
@@ -163,10 +167,17 @@ if __name__ == "__main__":
 		Xfull, sensor_cols = load_train_data(dataset_name)
 		baseline = utils.build_baseline(Xfull, history, method=exp_method)
 		expl = shap.DeepExplainer(event_detector.inner, baseline)
+	elif exp_method == 'LIME':
+		Xfull, sensor_cols = load_train_data(dataset_name)
+		baseline = utils.build_baseline(Xfull, history, method=exp_method)
+		expl = lime.lime_tabular.RecurrentTabularExplainer(baseline,
+								feature_names=np.arange(baseline.shape[2]),
+								verbose=False,
+								mode='regression')
 	else:
 		expl = None
 
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	attack_footers = get_footer_list(patterns=['cons'])
 	

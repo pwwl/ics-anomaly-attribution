@@ -20,6 +20,9 @@ import numpy as np
 import pdb
 import pickle
 
+import lime
+import shap
+
 import os
 import sys
 sys.path.append('..')
@@ -74,6 +77,8 @@ def explain_true_position(event_detector, lookup_name, attack_idx, attacks, Xtes
 			exp_output = lemna_score_generator(event_detector, Xinput, Yinput)
 		elif method == 'SHAP':
 			exp_output = shap_score_generator(event_detector, expl, Xinput, Yinput)
+		elif method == 'LIME':
+			exp_output = lime_score_generator(event_detector, expl, Xinput, Yinput)
 		else:
 			exp_output = (event_detector.predict(Xinput) - Yinput)**2
 
@@ -115,6 +120,8 @@ def explain_detect(event_detector, lookup_name, attack_idx, attacks, Xtest, dete
 				exp_output = lemna_score_generator(event_detector, Xinput, Yinput)
 			elif method == 'SHAP':
 				exp_output = shap_score_generator(event_detector, expl, Xinput, Yinput)
+			elif method == 'LIME':
+				exp_output = lime_score_generator(event_detector, expl, Xinput, Yinput)
 			else:
 				exp_output = (event_detector.predict(Xinput) - Yinput)**2
 
@@ -176,11 +183,18 @@ if __name__ == "__main__":
 		Xfull, sensor_cols = load_train_data(dataset_name)
 		baseline = utils.build_baseline(Xfull, history, method=exp_method)
 		expl = shap.DeepExplainer(event_detector.inner, baseline)
+	elif exp_method == 'LIME':
+		Xfull, sensor_cols = load_train_data(dataset_name)
+		baseline = utils.build_baseline(Xfull, history, method=exp_method)
+		expl = lime.lime_tabular.RecurrentTabularExplainer(baseline,
+								feature_names=np.arange(baseline.shape[2]),
+								verbose=False,
+								mode='regression')
 	else:
 		expl = None
 
 	# Practical detection
-	detection_points = pickle.load(open('meta-storage/detection-points.pkl', 'rb'))
+	detection_points = pickle.load(open(f'meta-storage/{lookup_name}-detection-points.pkl', 'rb'))
 	model_detection_points = detection_points[lookup_name]
 	explain_detect(event_detector, lookup_name, attack_idx, attacks, Xtest,
 			model_detection_points,

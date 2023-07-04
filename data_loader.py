@@ -77,7 +77,6 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
         if verbose:
             print('No scaler provided, trying to load from models directory...')
         scaler = pickle.load(open(f'models/{dataset_name}_scaler.pkl', "rb"))
-        print(f'Loading test data for {dataset_name} successful.')
 
     if dataset_name == 'TEP':
         
@@ -101,7 +100,9 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
 
     else:
         raise ValueError('Dataset name not found.')
-        return
+
+    if verbose:
+        print(f'Loading test data for {dataset_name} successful.')
 
     # scale sensor data
     if no_transform:

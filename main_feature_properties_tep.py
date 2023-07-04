@@ -414,6 +414,13 @@ def ideal_detection_timing(lookup_tupls):
 			'slice_tavg_opt_ranking': scatter_obj[:, 16],
 		})
 
+		print('--- At ideal timing -----')
+		print(f'MSE average ranking: {np.mean(df["sm_avg_ranking"])}')
+		print(f'SM average ranking: {np.mean(df["mse_avg_ranking"])}')
+		print(f'SHAP average ranking: {np.mean(df["shap_avg_ranking"])}')
+		print(f'LEMNA average ranking: {np.mean(df["lemna_avg_ranking"])}')
+		print(f'Full slice average ranking: {np.mean(df["slice_avg_ranking"])}')
+
 		pickle.dump(df, open(f'meta-storage/attribution-ranks/ideal-detection-timing-ranks-{lookup_name}.pkl', 'wb'))
 		pickle.dump(full_slice_values, open(f'meta-storage/attribution-ranks/ideal-detection-timing-scores-{lookup_name}.pkl', 'wb'))
 	
@@ -581,6 +588,13 @@ def real_detection_timing(lookup_tupls):
 			'slice_tavg_ranking': scatter_obj[det_idx, 15],
 		})
 
+		print('--- At real timing -----')
+		print(f'MSE average ranking: {np.mean(df["sm_avg_ranking"])}')
+		print(f'SM average ranking: {np.mean(df["mse_avg_ranking"])}')
+		print(f'SHAP average ranking: {np.mean(df["shap_avg_ranking"])}')
+		print(f'LEMNA average ranking: {np.mean(df["lemna_avg_ranking"])}')
+		print(f'Full slice average ranking: {np.mean(df["slice_avg_ranking"])}')
+
 		pickle.dump(df, open(f'meta-storage/attribution-ranks/real-detection-timing-ranks-{lookup_name}.pkl', 'wb'))
 		pickle.dump(full_slice_values, open(f'meta-storage/attribution-ranks/real-detection-timing-scores-{lookup_name}.pkl', 'wb'))
 
@@ -724,7 +738,5 @@ if __name__ == "__main__":
 	
 	ideal_detection_timing(lookup_tupls)
 	real_detection_timing(lookup_tupls)
-
-	stealthy_ranks(lookup_tupls)
 
 	print('Done!')

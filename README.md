@@ -163,42 +163,42 @@ python main_feature_properties_tep.py --md CNN-TEP-l2-hist50-kern3-units64-resul
 
 ### Overview of the Repository
 
-- [detector](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/detector): 
+- [detector](https://github.com/pwwl/ics-anomaly-attribution/tree/main/detector): 
     - `detector.py`: core definition for detector objects
     - `cnn.py`: model definition for convolutional neural network (CNN)
     - `gru.py`: model definition for gated recurrent unit (GRU)
     - `lstm.py`: model definition for long-short-term memory (LSTM)
-- [explain-eval-attacks](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/explain-eval-attacks): 
+- [explain-eval-attacks](https://github.com/pwwl/ics-anomaly-attribution/tree/main/explain-eval-attacks): 
     - `main_bbox_explain_attacks.py`: runner script to compute blackbox attributions on SWAT/WADI datasets
     - `main_grad_explain_attacks.py`: runner script to compute gradient-based attributions on SWAT/WADI datasets
     - `expl-full-bbox.sh`: convenience script to run `main_bbox_explain_attacks.py` for SHAP and LENMA
     - `expl-full-swat.sh`: convenience script to run `main_grad_explain_attacks.py` for SWAT dataset
     - `expl-full-wadi.sh`: convenience script to run `main_grad_explain_attacks.py` for WADI dataset
-- [explain-eval-manipulations](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/explain-eval-manipulations):
+- [explain-eval-manipulations](https://github.com/pwwl/ics-anomaly-attribution/tree/main/explain-eval-manipulations):
     - `main_bbox_explain_manipulations.py`: runner script to compute blackbox attributions on TEP dataset
     - `main_tep_grad_explain.py`: runner script to compute gradient-based attributions on TEP dataset
     - `expl-full-bbox.sh`: convenience script to run `main_bbox_explain_manipulations.py` for SHAP and LENMA
     - `expl-full-tep.sh`: convenience script to run `main_tep_explain_explain.py`
-- [live_bbox_explainer](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/live_bbox_explainer):
+- [live_bbox_explainer](https://github.com/pwwl/ics-anomaly-attribution/tree/main/live_bbox_explainer):
     - `score_generator.py`: API helper to run blackbox attributions
-- [live_grad_explainer](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/live_grad_explainer):
+- [live_grad_explainer](https://github.com/pwwl/ics-anomaly-attribution/tree/main/live_grad_explainer):
     - `explainer.py`: core definition for gradient-based explainer object
     - `expected_gradients_mse_explainer.py`: definition for expected gradients explainer object
     - `integrated_gradients_explainer.py`: definition for integrated gradients explainer object
     - `integrated_gradients_mse_explainer.py`: definition for total-MSE integrated gradients explainer object
     - `smooth_grad_explainer.py`: definition for SmoothGrad and saliency map explainer object
     - `smooth_grad_mse_explainer.py`: definition for total-MSE SmoothGrad and saliency map explainer object
-- [models](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/models): where trained model metadata is stored
+- [models](https://github.com/pwwl/ics-anomaly-attribution/tree/main/models): where trained model metadata is stored
     - `results`: default directory for model metadata storage
-- [plotting](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/plotting):
+- [plotting](https://github.com/pwwl/ics-anomaly-attribution/tree/main/plotting):
     - `make_benchmark_plot.py`: script used to create Figure 2 in paper (for reference)
     - `make_stats_plot.py`: script used to generate stats for Table 4 in paper (for reference)
     - `make_timing_plot.py`: script used to create Figure 4 in paper (for reference)
-- [pygflasso](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/pygflasso):
+- [pygflasso](https://github.com/pwwl/ics-anomaly-attribution/tree/main/pygflasso):
     - `gflasso.py`: Fused lasso model, used for LEMNA explanation
-- [tep-attacks/matlab](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/tep-attacks/matlab): contains CSV files corresponding to TEP attacks
+- [tep-attacks/matlab](https://github.com/pwwl/ics-anomaly-attribution/tree/main/tep-attacks/matlab): contains CSV files corresponding to TEP attacks
     - `TEP_test_cons_ps2_s1.csv`: contains a constant, two-standard-deviation manipulation on TEP sensor #1.
-- [utils](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/utils):
+- [utils](https://github.com/pwwl/ics-anomaly-attribution/tree/main/utils):
     - `attack_utils.py`: utility functions for attack parsing
     - `metrics.py`: utility functions for model metrics
     - `tep_plot_utils.py`: utility functions for plotting, specific to TEP

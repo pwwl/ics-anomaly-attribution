@@ -31,11 +31,6 @@
 - [Model Descriptions](#models)
 - [Parameters](#parameters)
 
-### Usage
-- [Execution](#execution)
-- [Training](#training)
-- [Explanations](#explanations)
-
 ## Core Experiment Workflow
 
 ### Requirements
@@ -83,7 +78,7 @@ Next, train a CNN model on the SWaT dataset:
 ```sh
 python main_train.py CNN SWAT --train_params_epochs 10
 ```
-This will utilize a default configuration of two layers, a history length of 50, a kernel size of 3, and 64 units per layer for the CNN model. See detailed explanations for main_train.py [here](#model-parameters).
+This will utilize a default configuration of two layers, a history length of 50, a kernel size of 3, and 64 units per layer for the CNN model. See detailed explanations for main_train.py parameters [here](#parameters).
 
 Next, use the CNN model to make predictions on the SWaT test dataset, and save the corresponding MSES.
 ```sh
@@ -110,13 +105,12 @@ Bash scripts `expl-full-bbox.sh` and `expl-full-swat.sh` are provided for refere
 Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
 Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
 
-Finally, rank the attribution methods for SWaT attack #1: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies.
+Finally, rank the attribution methods for SWaT attack #1: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies:
 ```sh
 python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-results
 ```
 
-**Note: All core experiments in this work follow the same workflow. To fully reproduce our results and generate plots, experiments must be run on all models (CNN, GRU, LSTM), all attacks/manipulations in all datasets (SWAT, WADI, TEP), 
-and against all attribution methods (CF, SM, SG, IG, EG, LIME, SHAP, LEMNA).**
+**Note: All core experiments in this work follow the same workflow. To fully reproduce our results and generate plots, experiments must be run on all models (CNN, GRU, LSTM), all attacks/manipulations in all datasets (SWAT, WADI, TEP), and against all attribution methods (CF, SM, SG, IG, EG, LIME, SHAP, LEMNA).**
 
 ### Workflow 2 - CNN on TEP Dataset
 
@@ -160,7 +154,7 @@ Bash scripts `expl-full-bbox.sh` and `expl-full-tep.sh` are provided for referen
 Note: running the explanations may take anywhere from 20 minutes to two hours depending on your machine, so stay patient!
 Additionally, depending on your shell configuration, you may need to change `python` to `python3` in the Bash scripts. If you are on Windows, you may also need to install and run [dos2unix](https://sourceforge.net/projects/dos2unix/) on the Bash scripts if you encounter errors with `\r` characters.
 
-Finally, rank the attribution methods for the TEP manipulation: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies.
+Finally, rank the attribution methods for the TEP manipulation: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies:
 ```sh
 python main_feature_properties_tep.py --md CNN-TEP-l2-hist50-kern3-units64-results
 ```
@@ -169,42 +163,42 @@ python main_feature_properties_tep.py --md CNN-TEP-l2-hist50-kern3-units64-resul
 
 ### Overview of the Repository
 
-- [detector](#): 
+- [detector](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/detector): 
     - `detector.py`: core definition for detector objects
     - `cnn.py`: model definition for convolutional neural network (CNN)
     - `gru.py`: model definition for gated recurrent unit (GRU)
     - `lstm.py`: model definition for long-short-term memory (LSTM)
-- [explain-eval-attacks](#): 
+- [explain-eval-attacks](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/explain-eval-attacks): 
     - `main_bbox_explain_attacks.py`: runner script to compute blackbox attributions on SWAT/WADI datasets
     - `main_grad_explain_attacks.py`: runner script to compute gradient-based attributions on SWAT/WADI datasets
     - `expl-full-bbox.sh`: convenience script to run `main_bbox_explain_attacks.py` for SHAP and LENMA
     - `expl-full-swat.sh`: convenience script to run `main_grad_explain_attacks.py` for SWAT dataset
     - `expl-full-wadi.sh`: convenience script to run `main_grad_explain_attacks.py` for WADI dataset
-- [explain-eval-manipulations](#):
+- [explain-eval-manipulations](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/explain-eval-manipulations):
     - `main_bbox_explain_manipulations.py`: runner script to compute blackbox attributions on TEP dataset
     - `main_tep_grad_explain.py`: runner script to compute gradient-based attributions on TEP dataset
     - `expl-full-bbox.sh`: convenience script to run `main_bbox_explain_manipulations.py` for SHAP and LENMA
     - `expl-full-tep.sh`: convenience script to run `main_tep_explain_explain.py`
-- [live_bbox_explainer](#):
+- [live_bbox_explainer](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/live_bbox_explainer):
     - `score_generator.py`: API helper to run blackbox attributions
-- [live_grad_explainer](#):
+- [live_grad_explainer](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/live_grad_explainer):
     - `explainer.py`: core definition for gradient-based explainer object
     - `expected_gradients_mse_explainer.py`: definition for expected gradients explainer object
     - `integrated_gradients_explainer.py`: definition for integrated gradients explainer object
     - `integrated_gradients_mse_explainer.py`: definition for total-MSE integrated gradients explainer object
     - `smooth_grad_explainer.py`: definition for SmoothGrad and saliency map explainer object
     - `smooth_grad_mse_explainer.py`: definition for total-MSE SmoothGrad and saliency map explainer object
-- [models](#): where trained model metadata is stored
+- [models](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/models): where trained model metadata is stored
     - `results`: default directory for model metadata storage
-- [plotting](#):
+- [plotting](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/plotting):
     - `make_benchmark_plot.py`: script used to create Figure 2 in paper (for reference)
     - `make_stats_plot.py`: script used to generate stats for Table 4 in paper (for reference)
     - `make_timing_plot.py`: script used to create Figure 4 in paper (for reference)
-- [pygflasso](#):
+- [pygflasso](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/pygflasso):
     - `gflasso.py`: Fused lasso model, used for LEMNA explanation
-- [tep-attacks/matlab](#): contains CSV files corresponding to TEP attacks
+- [tep-attacks/matlab](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/tep-attacks/matlab): contains CSV files corresponding to TEP attacks
     - `TEP_test_cons_ps2_s1.csv`: contains a constant, two-standard-deviation manipulation on TEP sensor #1.
-- [utils](#):
+- [utils](#https://github.com/pwwl/ics-anomaly-attribution/tree/main/utils):
     - `attack_utils.py`: utility functions for attack parsing
     - `metrics.py`: utility functions for model metrics
     - `tep_plot_utils.py`: utility functions for plotting, specific to TEP
@@ -275,7 +269,7 @@ The argparse library is used in most scripts, which can be run with the `--help`
 #### Model Parameters
 
 | Name      | Description | Default |
-| ---- | ---- | ---- |
+| ----- | ---- | --- |
 | --cnn_model_params_units | The number of units in each layer of the CNN. | 64 |
 | --cnn_model_params_history | The total size of the prediction window used. When predicting on an instance, this tells the model how far back in time to use in prediction. | 50 |
 | --cnn_model_params_layers | The number of CNN layers to use. | 2 |
@@ -290,7 +284,7 @@ The argparse library is used in most scripts, which can be run with the `--help`
 #### Training Parameters
 
 | Name      | Description | Default |
-| --- | --- | --- |
+| ----- | ---- | --- |
 | --train_params_epochs | The number of times to go over the training data | 100 |
 | --train_params_batch_size | Batch size when training. Note: MUST be larger than all history/window values given. | 512 |
 | --train_params_no_callbacks | Removes callbacks like early stopping | False |
@@ -307,13 +301,13 @@ The argparse library is used in most scripts, which can be run with the `--help`
 #### Metrics Parameter
 
 | Name      | Description | Default |
-| --- | --- | --- |
+| ----- | ---- | --- |
 | --detect_params_metrics | Metrics to look over (at least one required). | F1 |
 
 #### Specific Model Parameter
 
 | Name      | Description | Default |
-| --- | --- | --- |
+| --- | ---- | --- |
 | --md | Specifies an exact model to use. Format as `model-dataset-layers-history-kernel-units-runname` if model type is CNN, format as `model-dataset-layers-history-units-runname` otherwise (at least one required). | None |
 
 #### Specific Attack Parameter
@@ -325,14 +319,14 @@ The argparse library is used in most scripts, which can be run with the `--help`
 #### Blackbox Attribution Parameters
 
 | Name      | Description | Default |
-| --- | --- | --- |
+| ----- | ---- | --- |
 | --explain_params_methods | Select the attribution methods(s) to use: raw MSE (MSE), LIME, SHAP, or LEMNA | MSE |
 | --num_samples | Number of samples | 5 |
 
 #### Gradient Attribution Parameters
 
 | Name      | Description | Default |
-| --- | --- | --- |
+| ----- | ---- | --- |
 | --explain_params_methods | Select the attribution method(s) to use: saliency map (SM), SmoothGrad (SG), integrated gradients (IG), expected gradients (EG) | SM |
 | --explain_params_use_top_feat | Explain based off top MSE feature, rather than entire MSE | False |
 | --num_samples | Number of samples | 5 |

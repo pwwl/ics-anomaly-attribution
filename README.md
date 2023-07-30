@@ -143,10 +143,10 @@ Run attribution methods for the TEP manipulation, using the scripts in the `expl
 Saliency maps (SM), SHAP, and LEMNA can be executed as follows. 
 Each script will collect all attribution scores for 150 timesteps.
 ```sh
-cd explain-eval-attacks
-python main_tep_grad_explain.py.py CNN TEP --explain_params_methods SM --run_name results --num_samples 150
-python main_bbox_explain_manipulations.py.py CNN TEP --explain_params_methods SHAP --run_name results --num_samples 150
-python main_bbox_explain_manipulations.py.py CNN TEP --explain_params_methods LEMNA --run_name results --num_samples 150
+cd explain-eval-manipulations
+python main_tep_grad_explain.py CNN TEP cons_p2s_s1 --explain_params_methods SM --run_name results --num_samples 150
+python main_bbox_explain_manipulations.py CNN TEP --explain_params_methods SHAP --run_name results --num_samples 150
+python main_bbox_explain_manipulations.py CNN TEP --explain_params_methods LEMNA --run_name results --num_samples 150
 ```
 
 Bash scripts `expl-full-bbox.sh` and `expl-full-tep.sh` are provided for reference.

@@ -16,6 +16,20 @@
 
 # Attributions for ML-based ICS Anomaly Detection
 
+This respository contains code for the paper: "Attributions for ML-based ICS anomaly detection: From theory to practice", to appear at the 31st Network and Distributed System Security Symposium (NDSS 2024).
+
+### Bibtex
+
+```
+@inproceedings{icsanomaly:ndss2024,
+  title = {Attributions for {ML}-based {ICS} Anomaly Detection: {From} Theory to Practice},
+  author = {Clement Fung and Eric Zeng and Lujo Bauer},
+  booktitle = {Proceedings of the 31st Network and Distributed System Security Symposium},
+  publisher = {Internet Society},
+  year = 2024,
+}  
+```
+
 ## Table of Contents
 
 ### Core Experiment Workflow

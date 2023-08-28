@@ -121,6 +121,7 @@ Additionally, depending on your shell configuration, you may need to change `pyt
 
 Finally, rank the attribution methods for SWaT attack #1: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies:
 ```sh
+cd .. # Return to root directory
 python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-results
 ```
 
@@ -170,6 +171,7 @@ Additionally, depending on your shell configuration, you may need to change `pyt
 
 Finally, rank the attribution methods for the TEP manipulation: the four attribution methods (baseline MSE, SM, SHAP, LEMNA) will each be ranked and compared with our various timing strategies:
 ```sh
+cd .. # Return to root directory
 python main_feature_properties_tep.py --md CNN-TEP-l2-hist50-kern3-units64-results
 ```
 

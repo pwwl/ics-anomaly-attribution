@@ -16,7 +16,7 @@
 
 # Attributions for ML-based ICS Anomaly Detection
 
-This respository contains code for the paper: "Attributions for ML-based ICS anomaly detection: From theory to practice", to appear at the 31st Network and Distributed System Security Symposium (NDSS 2024).
+This repository contains code for the paper: "Attributions for ML-based ICS anomaly detection: From theory to practice", to appear at the 31st Network and Distributed System Security Symposium (NDSS 2024).
 
 ### Bibtex
 

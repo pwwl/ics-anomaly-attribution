@@ -85,7 +85,9 @@ pip install -r requirements.txt
 
 This repository is configured for three datasets: `TEP`, `SWAT`, and `WADI`.
 
+The TEP dataset is generated from a [public simulator](https://github.com/pwwl/tep-attack-simulator) (uses MATLAB).
 For convenience, the TEP training dataset is included. 
+
 The raw SWaT and WADI datasets need to be requested through the [iTrust website](https://itrust.sutd.edu.sg/itrust-labs_datasets/).
 
 For instructions on how to setup and process the raw datasets, see the associated README files in the `data` directory.

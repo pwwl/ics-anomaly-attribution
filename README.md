@@ -57,7 +57,7 @@ We also recommend using a Linux machine to avoid problems with executing Bash sc
 
 Our primarily development environment was a commodity desktop with 32 GB RAM, using Ubuntu 20.04.
 To store all packages, datasets, trained models, and output files, approximately 10 GB of storage is sufficient.
-If downloading and testing on the [full set of TEP manipulations](https://drive.google.com/file/d/1h9rYcuU6VLGS2vl5o5jDkrAz5HuSDe1F/view?usp=sharing), another 50 GB is required.
+If downloading and testing on the [full set of TEP manipulations](https://doi.org/10.1184/R1/23805552), another 50 GB is required.
 
 ### Installation
 

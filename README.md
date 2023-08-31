@@ -137,7 +137,7 @@ python main_feature_properties.py 1 --md CNN-SWAT-l2-hist50-kern3-units64-result
 
 **Note: All core experiments in this work follow the same workflow. To fully reproduce our results and generate plots, experiments must be run on all models (CNN, GRU, LSTM), all attacks/manipulations in all datasets (SWAT, WADI, TEP), and against all attribution methods (CF, SM, SG, IG, EG, LIME, SHAP, LEMNA).**
 
-For examples of how to train a GRU or LSTM model on SWaT dataset, please see the provided guides for [GRU](README-alt-workflow.md#workflow-1b---gru-on-swat-dataset) and [LSTM](README-alt-workflow.md#workflow-1c---lstm-on-swat-dataset) respectively. The command line arguments differ slightly.
+> For examples of how to train a GRU or LSTM model on SWaT dataset, please see the provided guides for [GRU](README-alt-workflow.md#workflow-1b---gru-on-swat-dataset) and [LSTM](README-alt-workflow.md#workflow-1c---lstm-on-swat-dataset) respectively. The command line arguments differ slightly.
 
 ### Workflow 2 - CNN on TEP Dataset
 
@@ -187,7 +187,7 @@ cd .. # Return to root directory
 python main_feature_properties_tep.py --md CNN-TEP-l2-hist50-kern3-units64-results
 ```
 
-For examples of how to train a GRU or LSTM model on TEP dataset, please see the provided guides for [GRU](README-alt-workflow.md#workflow-2b---gru-on-tep-dataset) and [LSTM](README-alt-workflow.md#workflow-2c---lstm-on-tep-dataset) respectively. The command line arguments differ slightly.
+> For examples of how to train a GRU or LSTM model on TEP dataset, please see the provided guides for [GRU](README-alt-workflow.md#workflow-2b---gru-on-tep-dataset) and [LSTM](README-alt-workflow.md#workflow-2c---lstm-on-tep-dataset) respectively. The command line arguments differ slightly.
 
 ## Reference Information
 

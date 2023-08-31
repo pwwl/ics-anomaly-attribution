@@ -20,6 +20,8 @@ This repository contains code for the paper: "Attributions for ML-based ICS anom
 
 ### Bibtex
 
+[![DOI](https://zenodo.org/badge/658993985.svg)](https://zenodo.org/badge/latestdoi/658993985)
+
 ```
 @inproceedings{icsanomaly:ndss2024,
   title = {Attributions for {ML}-based {ICS} Anomaly Detection: {From} Theory to Practice},

@@ -117,7 +117,7 @@ Next, train a LSTM model on the SWaT dataset:
 ```sh
 python main_train.py LSTM SWAT --train_params_epochs 10
 ```
-This will utilize a default configuration of two layers, a history length of 50, and 64 units per layer for the GRU model. 
+This will utilize a default configuration of two layers, a history length of 50, and 64 units per layer for the LSTM model. 
 See detailed explanations for main_train.py parameters [here](README.md#parameters).
 
 Next, use the LSTM model to make predictions on the SWaT test dataset, and save the corresponding MSES.

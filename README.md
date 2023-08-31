@@ -35,6 +35,7 @@ This repository contains code for the paper: "Attributions for ML-based ICS anom
 ### Core Experiment Workflow
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Data Setup](#data-setup)
 - [Workflow 1 - CNN on SWaT Dataset](#workflow-1---cnn-on-swat-dataset)
 - [Workflow 2 - CNN on TEP Dataset](#workflow-2---cnn-on-tep-dataset)
 

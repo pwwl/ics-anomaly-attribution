@@ -79,6 +79,15 @@ cd ics-anomaly-attribution
 pip install -r requirements.txt
 ```
 
+### Data Setup
+
+This repository is configured for three datasets: `TEP`, `SWAT`, and `WADI`.
+
+For convenience, the TEP training dataset is included. 
+The raw SWaT and WADI datasets need to be requested through the [iTrust website](https://itrust.sutd.edu.sg/itrust-labs_datasets/).
+
+For instructions on how to setup and process the raw datasets, see the associated README files in the `data` directory.
+
 ### Workflow 1 - CNN on SWaT Dataset
 
 This workflow will walk you through training a CNN model on the SWaT dataset, as well as generating explanations on a singular attack. Ensure you have retrieved the dataset as mentioned [here](#using-the-datasets).
@@ -252,14 +261,6 @@ Three datasets are supported:
     * A 53 feature dataset of a chemical process, collected from a public MATLAB simulation environment.
     * Testing data for this dataset was created by modifying the simulator and systematically injecting manipulations into the process. 
     * The modified simulator is [publicly available](https://github.com/pwwl/tep-attack-simulator).
-
-#### Using the Datasets
-
-For your convenience, we have provided these datasets in the submission form via `datasets.tar.gz`. Normally, the SWaT and WADI datasets must be requested via the [iTrust website](https://itrust.sutd.edu.sg/itrust-labs_datasets/) and the request may take several days to be approved. For the sake of this evaluation, the cleaned and processed versions of these datasets can be used by simply extracting `datasets.tar.gz` into the `ics-anomaly-attribution` directory:
-```sh
-tar -xvzf datasets.tar.gz
-```
-This will produce a `data` directory that contains the SWaT, WADI, and TEP datasets, ready to be used.
 
 ### Models
 

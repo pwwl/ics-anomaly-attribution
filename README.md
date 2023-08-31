@@ -42,7 +42,6 @@ This repository contains code for the paper: "Attributions for ML-based ICS anom
 ### Reference information
 - [Overview of the Repository](#overview-of-the-repository)
 - [Dataset Descriptions](#datasets)
-    - [Using the Datasets](#using-the-datasets)
 - [Model Descriptions](#models)
 - [Parameters](#parameters)
 
